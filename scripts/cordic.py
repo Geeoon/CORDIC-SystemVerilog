@@ -8,7 +8,7 @@ parser.add_argument('--path', type=pathlib.Path, default=pathlib.Path.cwd(), req
 parser.add_argument('bit_width', type=int, help='The bit width of the numbers (e.g., angle and out_x/out_y)')
 args = parser.parse_args()
 
-assert(args.bit_width >= 1)
+assert(args.bit_width >= 2)  # otherwise HDL will be messed up 
 
 def compute_K(n: int) -> float:
     """
