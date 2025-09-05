@@ -21,8 +21,9 @@ module cordic_data
     output logic reached_target, dir; 
 
     logic [BIT_WIDTH-1:0] target_reg, current;
-    logic [BIT_WIDTH-2:0] diff;
-    logic [LOG_2_BIT_WIDTH-1:0] i;
+    logic [BIT_WIDTH-1:0] diff;  // technically if we make this -1 instead of -2, it will allow us to have
+    // bit widths of 1, but at that point, you could just write a normal LUT
+    logic [LOG_2_BIT_WIDTH:0] i;  // we need an extra bit to bitshift to the end; TODO: rename
 
     always_ff @(posedge clk) begin
         if (add) begin
@@ -43,7 +44,7 @@ module cordic_data
         end
 
         if (load_regs) begin
-            diff <= '1;  // NOTE: might give truncation warning
+            diff <= {1'b1, {(BIT_WIDTH-1){1'b0}}};  // NOTE: might give truncation warning
             current <= 0;
             target_reg <= target;
             x <= K;

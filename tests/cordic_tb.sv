@@ -39,7 +39,26 @@ module cordic_tb();
         start = 0;
         repeat(2) @(posedge clk);
 
-        // TODO: more tests
+        // testing angle pi / 4
+        angle = 2**31;  // halfway
+        start = 1;
+        @(posedge done);
+        start = 0;
+        repeat(2) @(posedge clk);
+
+        // testing angle pi / 6
+        angle = 32'd715827883;  // 1/3 the way
+        start = 1;
+        @(posedge done);
+        start = 0;
+        repeat(2) @(posedge clk);
+
+        // testing angle pi / 3
+        angle = 32'd1431655766;  // 2/3 the way
+        start = 1;
+        @(posedge done);
+        start = 0;
+        repeat(2) @(posedge clk);
         $stop;
     end  // initial
     
