@@ -1,60 +1,57 @@
 /**
- * @file cordic_rot.sv
+ * @file cordic_ctrl.sv
  * @author Geeoon Chung
- * @brief implements the cordic_data module, the datapath for the cordic module
+ * @brief implements the cordic_ctrl module, the controlpath for the cordic module
  */
 
-module cordic_data
-    #(parameter BIT_WIDTH,
-      parameter LOG_2_BIT_WIDTH,
-      parameter K)
-    (clk, add, sub, iter, load_regs, target, x, y, reached_target, dir);
+module cordic_ctrl
+    #(parameter BIT_WIDTH)
+    (clk, reset, start, reached_target, dir, iter, load_regs, add, sub, done);
     /**
-     * @brief controlpath for the cordic module
+     * @brief datapath for the cordic module
      * @see ASMD chart
      * @note signals documented in the ASMD chart
      */
-    input logic clk, add, sub, iter, load_regs;
-    input logic [BIT_WIDTH-1:0] target;
+    input logic clk, reset, start, reached_target, dir;
 
-    output logic [BIT_WIDTH-1:0] x, y;
-    output logic reached_target, dir; 
+    output logic iter, load_regs, add, sub, done;
 
-    logic [BIT_WIDTH-1:0] target_reg, current;
-    logic [BIT_WIDTH-2:0] diff;
-    logic [LOG_2_BIT_WIDTH-1:0] i;
+    enum logic { s_init, s_compute } ps, ns;
 
     always_ff @(posedge clk) begin
-        if (add) begin
-            current <= current + diff;
-            x <= x - (y >> i);
-            y <= y - (x >> i);
-        end
-
-        if (sub) begin
-            current <= current - diff;
-            x <= x + (y >> i);
-            y <= y - (x >> i);
-        end
-
-        if (iter) begin
-            i <= i + 1;
-            diff <= diff >> 1;
-        end
-
-        if (load_regs) begin
-            diff <= '1;  // NOTE: might give truncation warning
-            current <= 0;
-            target_reg <= target;
-            x <= K;
-            y <= 0;
-            i <= 1;
-        end
+        if (reset) ps <= s_init;
+        else ps <= ns;
     end  // always_ff
 
     always_comb begin
-        reached_target = current == target;
-        dir = current < target;
+        iter = 0;
+        load_regs = 0;
+        add = 0;
+        sub = 0;
+        done = 0;
+        case (ps)
+            s_init: begin
+                done = 1;
+                if (start) begin
+                    load_regs = 1;
+                    ns = s_compute;
+                end else begin
+                    ns = s_init;
+                end
+            end  // s_init
+
+            s_compute: begin
+                if (reached_target) begin
+                    done = 1;  // saves a clock cycle
+                    ns = s_init;
+                end else begin
+                    iter = 1;
+                    if (dir) add = 1;
+                    else sub = 1;
+                    ns = s_compute;
+                end
+            end  // s_compute
+        endcase
     end  // always_comb
 
-endmodule  // cordic_data
+endmodule  // cordic_ctrl

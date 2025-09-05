@@ -29,11 +29,11 @@ cordic_filepath = args.path / "cordic.sv"
 cordic_data_filepath = args.path / "cordic_data.sv"
 cordic_ctrl_filepath = args.path / "cordic_ctrl.sv"
 
-with cordic_filepath.open("w", encoding="ascii") as file:
-    file.write(constants.CORDIC_MODULE.format(args.bit_width, log_2_bits, precomputed_K))
+with cordic_filepath.open("w", encoding="utf-8") as file:
+    file.write(constants.CORDIC_MODULE.format(args.bit_width, log_2_bits, f"{args.bit_width}'d{precomputed_K}"))
 
-with cordic_data_filepath.open("w", encoding="ascii") as file:
-    file.write(constants.CORDIC_CTRL_MODULE)
-
-with cordic_ctrl_filepath.open("w", encoding="ascii") as file:
+with cordic_data_filepath.open("w", encoding="utf-8") as file:
     file.write(constants.CORDIC_DATA_MODULE)
+
+with cordic_ctrl_filepath.open("w", encoding="utf-8") as file:
+    file.write(constants.CORDIC_CTRL_MODULE)

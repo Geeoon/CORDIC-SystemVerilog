@@ -7,9 +7,9 @@
  */
 
 module cordic
-    #(parameter BIT_WIDTH=???, 
-      parameter LOG_2_BIT_WIDTH=???,
-      parameter K=???)
+    #(parameter BIT_WIDTH={}, 
+      parameter LOG_2_BIT_WIDTH={},
+      parameter K={})
     (clk, reset, start, angle, out_x, out_y, done);
     /**
      * @brief computes the coordinates of a rotation using CORDIC.  Only positive outputs (quadrant I)
@@ -38,8 +38,6 @@ module cordic
 	output logic done;
 
     logic reached_target, dir, iter, load_regs, add, sub;
-	cordiv_ctrl #(BIT_WIDTH=BIT_WIDTH) controller (.clk, .reset, .start, .reached_target, .dir, .iter, .load_regs, .add, .sub, .done)
-	cordiv_data #(BIT_WIDTH=BIT_WIDTH, LOG_2_BIT_WIDTH=LOG_2_BIT_WIDTH, K=K) datapath (.clk, .add, .sub, .iter, .load_regs, .target(angle), .x(out_x), .y(out_y), .reached_target, .dir)
-
-    
+	cordic_ctrl #(.BIT_WIDTH(BIT_WIDTH)) controller (.clk, .reset, .start, .reached_target, .dir, .iter, .load_regs, .add, .sub, .done);
+	cordic_data #(.BIT_WIDTH(BIT_WIDTH), .LOG_2_BIT_WIDTH(LOG_2_BIT_WIDTH), .K(K)) datapath (.clk, .add, .sub, .iter, .load_regs, .target(angle), .x(out_x), .y(out_y), .reached_target, .dir);
 endmodule  // cordic

@@ -44,10 +44,8 @@ module cordic
 	output logic done;
 
     logic reached_target, dir, iter, load_regs, add, sub;
-	cordiv_ctrl #(BIT_WIDTH=BIT_WIDTH) controller (.clk, .reset, .start, .reached_target, .dir, .iter, .load_regs, .add, .sub, .done)
-	cordiv_data #(BIT_WIDTH=BIT_WIDTH, LOG_2_BIT_WIDTH=LOG_2_BIT_WIDTH, K=K) datapath (.clk, .add, .sub, .iter, .load_regs, .target(angle), .x(out_x), .y(out_y), .reached_target, .dir)
-
-    
+	cordic_ctrl #(.BIT_WIDTH(BIT_WIDTH)) controller (.clk, .reset, .start, .reached_target, .dir, .iter, .load_regs, .add, .sub, .done);
+	cordic_data #(.BIT_WIDTH(BIT_WIDTH), .LOG_2_BIT_WIDTH(LOG_2_BIT_WIDTH), .K(K)) datapath (.clk, .add, .sub, .iter, .load_regs, .target(angle), .x(out_x), .y(out_y), .reached_target, .dir);
 endmodule  // cordic
 """
 
@@ -85,7 +83,7 @@ module cordic_ctrl
         case (ps)
             s_init: begin
                 done = 1;
-                if (start): begin
+                if (start) begin
                     load_regs = 1;
                     ns = s_compute;
                 end else begin
@@ -100,7 +98,7 @@ module cordic_ctrl
                 end else begin
                     iter = 1;
                     if (dir) add = 1;
-                    else sub = 1
+                    else sub = 1;
                     ns = s_compute;
                 end
             end  // s_compute

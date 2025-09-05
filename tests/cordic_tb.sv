@@ -26,16 +26,18 @@ module cordic_tb();
     initial begin
         // reset
         reset = 1;
+        start = 0;
         angle = 0;
         @(posedge clk);
-
-        // testing angle = 0
         reset = 0;
+        @(posedge clk);
+        
+        // testing angle = 0
         angle = 0;
         start = 1;
         @(posedge done);
         start = 0;
-        @(posedge clk);
+        repeat(2) @(posedge clk);
 
         // TODO: more tests
         $stop;
