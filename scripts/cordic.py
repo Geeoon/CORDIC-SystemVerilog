@@ -21,19 +21,36 @@ def compute_K(n: int) -> float:
         k *= 1.0 / math.sqrt(1 + 2 ** (-2 * i))
     return k
 
-precomputed_K = math.floor(compute_K(args.bit_width) * 2**args.bit_width)  # floor because overestimating will result in overflows
+precomputed_K = math.floor(2**args.bit_width / compute_K(args.bit_width))  # floor because overestimating will result in overflows
 log_2_bits = math.ceil(math.log2(args.bit_width))
 
 args.path.mkdir(parents=True, exist_ok=True)
-cordic_filepath = args.path / "cordic.sv"
-cordic_data_filepath = args.path / "cordic_data.sv"
-cordic_ctrl_filepath = args.path / "cordic_ctrl.sv"
+output_cordic_filepath = args.path / "cordic.sv"
+output_cordic_data_filepath = args.path / "cordic_data.sv"
+output_cordic_ctrl_filepath = args.path / "cordic_ctrl.sv"
 
-with cordic_filepath.open("w", encoding="utf-8") as file:
-    file.write(constants.CORDIC_MODULE.format(args.bit_width, log_2_bits, f"{args.bit_width}'d{precomputed_K}"))
+input_cordic_filepath = pathlib.Path().cwd() / "../cordic_base/cordic.sv"
+input_cordic_data_filepath = pathlib.Path().cwd() / "../cordic_base/cordic_data.sv"
+input_cordic_ctrl_filepath = pathlib.Path().cwd() / "../cordic_base/cordic_ctrl.sv"
 
-with cordic_data_filepath.open("w", encoding="utf-8") as file:
-    file.write(constants.CORDIC_DATA_MODULE)
+cordic_module: str = None
+cordic_data_module: str = None
+cordic_ctrl_module: str = None
 
-with cordic_ctrl_filepath.open("w", encoding="utf-8") as file:
-    file.write(constants.CORDIC_CTRL_MODULE)
+with input_cordic_filepath.open("r", encoding="utf-8") as file:
+    cordic_module = file.read()
+
+with input_cordic_data_filepath.open("r", encoding="utf-8") as file:
+    cordic_data_module = file.read()
+
+with input_cordic_ctrl_filepath.open("r", encoding="utf-8") as file:
+    cordic_ctrl_module = file.read()
+
+with output_cordic_filepath.open("w", encoding="utf-8") as file:
+    file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width}'d{precomputed_K}"))
+
+with output_cordic_data_filepath.open("w", encoding="utf-8") as file:
+    file.write(cordic_data_module)
+
+with output_cordic_ctrl_filepath.open("w", encoding="utf-8") as file:
+    file.write(cordic_ctrl_module)

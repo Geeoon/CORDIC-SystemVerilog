@@ -9,7 +9,7 @@
 module cordic
     #(parameter BIT_WIDTH=32, 
       parameter LOG_2_BIT_WIDTH=5,
-      parameter K=32'd2608131496)
+      parameter K=32'd7072781452)
     (clk, reset, start, angle, out_x, out_y, done);
     /**
      * @brief computes the coordinates of a rotation using CORDIC.  Only positive outputs (quadrant I)
