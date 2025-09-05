@@ -1,0 +1,44 @@
+/**
+ * @file cordic.sv
+ * @author Geeoon Chung
+ * @brief implements the cordic module
+ * @see https://en.wikipedia.org/wiki/CORDIC
+ */
+
+module cordic
+    #(parameter BIT_WIDTH=8, 
+      parameter LOG_2_BIT_WIDTH=3,
+      parameter K=155.45833274851657)
+    (clk, reset, start, angle, out_x, out_y, done);
+    /**
+     * @brief computes the coordinates of a rotation using CORDIC.  Only positive outputs (quadrant I)
+     * @param   BIT_WIDTH=8 the width of the output data.
+     *          Trigonometric output of 0 = 0
+     *          Trigonometric output of 1 = 2^BIT_WIDTH - 1
+     *		AND
+     *          the width of the angle (scaled to the first quadrant).
+     *          0 radians = 0
+     *          pi / 4 radians = 2^(BIT_WIDTH-1)
+     *          pi / 2 radians - 0 = 2^BIT_WIDTH - 1
+     *          where "- 0" signifies a small value
+     * @input   clk the clock driving the sequential logic
+     * @input   reset an active high synchronous reset
+     * @input	start 1 to start the calculation
+     * @note    start will not do anything if done is 0
+     * @input   angle the input angle.  width = DATA_WIDTH
+     * @output  out_x the x coordinate output.  width = BIT_WIDTH
+     * @output  out_y the y coordinate output.  width = BIT_WIDTH
+     * @output  done 1 if the out_x and out_y registers can be read
+     */
+	input logic clk, reset, start;
+	input logic [BIT_WIDTH-1:0] angle;
+
+    output logic [BIT_WIDTH-1:0] out_x, out_y;
+	output logic done;
+
+    logic reached_target, dir, iter, load_regs, add, sub;
+	cordiv_ctrl #(BIT_WIDTH=BIT_WIDTH) controller (.clk, .reset, .start, .reached_target, .dir, .iter, .load_regs, .add, .sub, .done)
+	cordiv_data #(BIT_WIDTH=BIT_WIDTH, LOG_2_BIT_WIDTH=LOG_2_BIT_WIDTH, K=K) datapath (.clk, .add, .sub, .iter, .load_regs, .target(angle), .x(out_x), .y(out_y), .reached_target, .dir)
+
+    
+endmodule  // cordic
