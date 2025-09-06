@@ -1,16 +1,16 @@
 /**
- * @file cordic_sine.sv
+ * @file cordic_cosine.sv
  * @author Geeoon Chung
- * @brief this file implements the cordic_sine module
+ * @brief this file implements the cordic_cosine module
  */
 
-module cordic_sine
+module cordic_cosine
     #(parameter BIT_WIDTH={}, 
       parameter LOG_2_BIT_WIDTH_MIN_2={},
       parameter K={})
     (clk, reset, start, angle, value, ready, done);
     /**
-     * @brief computes the sine of an angle using CORDIC
+     * @brief computes the cosine of an angle using CORDIC
      * @param   BIT_WIDTH the width of the input and the output
      * @param   LOG_2_BIT_WIDTH_MIN_2 log base 2 of the bit width minus 2; i.e. log_2(BIT_WIDTH - 2)
      * @param   K the precomputed K constant
@@ -18,9 +18,9 @@ module cordic_sine
      * @note    update the the rest of the parameters when you update any of them
      * @note    updating the parameters will result in lower effiency.  it is better to regenerate the files 
      * @input   reset a synchronous active high reset
-     * @input   angle the input to the sine function
+     * @input   angle the input to the cosine function
      * @input   start active high start to the calculation
-     * @output  value the output of the sine function
+     * @output  value the output of the cosine function
      * @output  ready whether or not the module is ready to start a computation
      * @output  done whether or not the computation is complete
      */
@@ -40,9 +40,9 @@ module cordic_sine
              .reset,
              .start,
              .angle(cordic_in),
-             .out_x(),  // unused
-             .out_y(cordic_out),
-             .ready(coridc_ready),
+             .out_x(cordic_out),
+             .out_y(),  // unused
+             .ready(cordic_ready),
              .done(cordic_done));
 
     always_ff @(posedge clk) begin
@@ -61,11 +61,12 @@ module cordic_sine
     end  // always_ff
 
     always_comb begin
-        if (angle[BIT_WIDTH-1]) begin
-            // quadrant III and IV (negative)
+        // figure out a faster way without XOR
+        if (angle[BIT_WIDTH-1] ^ angle[BIT_WIDTH-2]) begin
+            // quadrant II and III (negative)
             value_int = {{1'b1, -cordic_out, 1'b1}};  // doubled because of f string
         end else begin
-            // quadrant I and II (positive)
+            // quadrant I and IV (positive)
             value_int = {{1'b0, cordic_out, 1'b0}};  // doubled because of f string
         end
 
@@ -79,4 +80,4 @@ module cordic_sine
             cordic_in = angle[BIT_WIDTH-3:0];
         end
     end  // always_comb
-endmodule  // cordic_sine
+endmodule  // cordic_cosine

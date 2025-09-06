@@ -1,10 +1,10 @@
 /**
- * @file cordic_sine_tb.sv
+ * @file cordic_cosine_tb.sv
  * @author Geeoon Chung
- * @brief tests the cordic_sine module
+ * @brief tests the cordic_cosine module
  * @note uses a bit width of 32
  */
-module cordic_sine_tb();
+module cordic_cosine_tb();
     parameter CLOCK_PERIOD = 100;
     // inputs
     logic clk, reset, start;
@@ -14,7 +14,7 @@ module cordic_sine_tb();
     logic ready, done;
     logic signed [31:0] value;
 
-    cordic_sine dut (.*);
+    cordic_cosine dut (.*);
 
     initial begin
         clk <= 0;

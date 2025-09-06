@@ -48,7 +48,8 @@ module cordic_sine
     always_ff @(posedge clk) begin
         if (reset) begin
             value <= 0;
-            done <= 1;
+            done <= 0;
+            ready <= 0;
         end else begin
             // register the output to prevent timing issues
             value <= value_int;

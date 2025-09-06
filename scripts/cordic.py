@@ -97,14 +97,23 @@ if not args.standalone:
     args.bit_width += 2
 
     output_cordic_sine_filepath = args.path / "cordic_sine.sv"
+    output_cordic_cosine_filepath = args.path / "cordic_cosine.sv"
 
     input_cordic_sine_filepath = pathlib.Path().cwd() / "../cordic_base/cordic_sine.sv"
+    input_cordic_cosine_filepath = pathlib.Path().cwd() / "../cordic_base/cordic_cosine.sv"
 
     cordic_sine_module: str = None
+    cordic_cosine_module: str = None
 
     with input_cordic_sine_filepath.open("r", encoding="utf-8") as file:
         cordic_sine_module = file.read()
 
+    with input_cordic_cosine_filepath.open("r", encoding="utf-8") as file:
+        cordic_cosine_module = file.read()
+
 
     with output_cordic_sine_filepath.open("w", encoding="utf-8") as file:
         file.write(cordic_sine_module.format(args.bit_width, log_2_bits, f"{args.bit_width-1}'sd{precomputed_K}"))
+
+    with output_cordic_cosine_filepath.open("w", encoding="utf-8") as file:
+        file.write(cordic_cosine_module.format(args.bit_width, log_2_bits, f"{args.bit_width-1}'sd{precomputed_K}"))

@@ -21,7 +21,7 @@ module cordic_data
     output logic reached_target, dir; 
 
     // internal register with an extra bit due to signedness
-    logic signed [BIT_WIDTH:0] x_reg, y_reg, shifted_x, shifted_y;
+    logic signed [BIT_WIDTH+1:0] x_reg, y_reg, shifted_x, shifted_y;
 
     logic signed [BIT_WIDTH+1:0] current;  // signed and resistant to overflow
     logic [BIT_WIDTH-1:0] target_reg;
@@ -63,7 +63,8 @@ module cordic_data
         if (x_reg[BIT_WIDTH]) begin
             // if its negative
             // convert to magnitude
-            x = -x_reg[BIT_WIDTH-1:0];
+            // x = -x_reg[BIT_WIDTH-1:0];
+            x = ~x_reg[BIT_WIDTH-1:0];  // this method is off by one but faster and won't overflow
             shifted_x = x_reg >>> i;
         end else begin
             // if its positive
@@ -74,7 +75,8 @@ module cordic_data
         if (y_reg[BIT_WIDTH]) begin
             // if its negative
             // convert to magnitude
-            y = -y_reg[BIT_WIDTH-1:0];
+            // y = -y_reg[BIT_WIDTH-1:0];
+            y = ~y_reg[BIT_WIDTH-1:0];// this method is off by one but faster and won't overflow
             shifted_y = y_reg >>> i;
         end else begin
             // if its positive
