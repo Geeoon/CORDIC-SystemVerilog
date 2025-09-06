@@ -3,8 +3,11 @@ import argparse
 import pathlib
 
 parser = argparse.ArgumentParser(description='Script to generate SystemVerilog and/or MIF files for CORDIC')
-parser.add_argument('--path', type=pathlib.Path, default=pathlib.Path.cwd(), required=False, help='The path of the output file(s)')
-parser.add_argument('bit_width', type=int, help='The bit width of the numbers (e.g., angle and out_x/out_y)')
+parser.add_argument('-p', '--path', type=pathlib.Path, default=pathlib.Path.cwd(), required=False, help='the path of the output file(s)')
+parser.add_argument('-s', '--standalone', action='store_true', default=False, required=False, help='only generate the CORDIC core module.' \
+                                                                                                    'also sets the bit width to be the ' \
+                                                                                                    'bit width for the cordic module')
+parser.add_argument('bit_width', type=int, help='the bit width of the numbers (e.g., angle and out_x/out_y)')
 args = parser.parse_args()
 
 assert(args.bit_width >= 2)  # otherwise HDL will be messed up 
@@ -43,7 +46,9 @@ def convert_steps_to_lut(steps: list[int], n: int) -> str:
     out += f"            default: value={n}'bx;"
     return out
 
-precomputed_K = math.floor((2**args.bit_width) * compute_K(args.bit_width))  # floor because overestimating could result in overflows
+if not args.standalone:
+    args.bit_width -= 2
+precomputed_K = math.floor((2**args.bit_width) * compute_K(args.bit_width))
 log_2_bits = math.ceil(math.log2(args.bit_width))
 
 args.path.mkdir(parents=True, exist_ok=True)
@@ -74,6 +79,7 @@ with input_cordic_ctrl_filepath.open("r", encoding="utf-8") as file:
 with input_cordic_lut_filepath.open("r", encoding="utf-8") as file:
     cordic_lut_module = file.read()
 
+
 with output_cordic_filepath.open("w", encoding="utf-8") as file:
     file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width+1}'sd{precomputed_K}"))
 
@@ -85,3 +91,20 @@ with output_cordic_ctrl_filepath.open("w", encoding="utf-8") as file:
 
 with output_cordic_lut_filepath.open("w", encoding="utf-8") as file:
     file.write(cordic_lut_module.format(convert_steps_to_lut(calculate_steps(args.bit_width), args.bit_width)))
+
+
+if not args.standalone:
+    args.bit_width += 2
+
+    output_cordic_sine_filepath = args.path / "cordic_sine.sv"
+
+    input_cordic_sine_filepath = pathlib.Path().cwd() / "../cordic_base/cordic_sine.sv"
+
+    cordic_sine_module: str = None
+
+    with input_cordic_sine_filepath.open("r", encoding="utf-8") as file:
+        cordic_sine_module = file.read()
+
+
+    with output_cordic_sine_filepath.open("w", encoding="utf-8") as file:
+        file.write(cordic_sine_module.format(args.bit_width, log_2_bits, f"{args.bit_width-1}'sd{precomputed_K}"))

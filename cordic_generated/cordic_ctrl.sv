@@ -6,7 +6,7 @@
 
 module cordic_ctrl
     #(parameter BIT_WIDTH)
-    (clk, reset, start, reached_target, dir, iter, load_regs, add, sub, done);
+    (clk, reset, start, reached_target, dir, iter, load_regs, add, sub, ready, done);
     /**
      * @brief datapath for the cordic module
      * @see ASMD chart
@@ -14,9 +14,9 @@ module cordic_ctrl
      */
     input logic clk, reset, start, reached_target, dir;
 
-    output logic iter, load_regs, add, sub, done;
+    output logic iter, load_regs, add, sub, ready, done;
 
-    enum logic { s_init, s_compute } ps, ns;
+    enum logic [1:0] { s_init, s_compute, s_done } ps, ns;
 
     always_ff @(posedge clk) begin
         if (reset) ps <= s_init;
@@ -28,10 +28,11 @@ module cordic_ctrl
         load_regs = 0;
         add = 0;
         sub = 0;
+        ready = 0;
         done = 0;
         case (ps)
             s_init: begin
-                done = 1;
+                ready = 1;
                 if (start) begin
                     load_regs = 1;
                     ns = s_compute;
@@ -41,15 +42,21 @@ module cordic_ctrl
             end  // s_init
 
             s_compute: begin
-                if (reached_target) begin
-                    ns = s_init;
-                end else begin
-                    ns = s_compute;
-                end
                 iter = 1;
                 if (dir) add = 1;
                 else sub = 1;
+                if (reached_target) begin
+                    ns = s_done;
+                end else begin
+                    ns = s_compute;
+                end
             end  // s_compute
+
+            s_done: begin
+                done = 1;
+                if (start) ns = s_done;
+                else ns = s_init;
+            end
         endcase
     end  // always_comb
 

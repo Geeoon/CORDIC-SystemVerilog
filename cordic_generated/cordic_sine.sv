@@ -5,9 +5,9 @@
  */
 
 module cordic_sine
-    #(parameter BIT_WIDTH={}, 
-      parameter LOG_2_BIT_WIDTH_MIN_2={},
-      parameter K={})
+    #(parameter BIT_WIDTH=32, 
+      parameter LOG_2_BIT_WIDTH_MIN_2=5,
+      parameter K=31'sd652032874)
     (clk, reset, start, angle, value, ready, done);
     /**
      * @brief computes the sine of an angle using CORDIC
@@ -62,10 +62,10 @@ module cordic_sine
     always_comb begin
         if (angle[BIT_WIDTH-1]) begin
             // quadrant III and IV (negative)
-            value_int = {{1'b1, -cordic_out, 1'b1}};  // doubled because of f string
+            value_int = {1'b1, -cordic_out, 1'b1};  // doubled because of f string
         end else begin
             // quadrant I and II (positive)
-            value_int = {{1'b0, cordic_out, 1'b0}};  // doubled because of f string
+            value_int = {1'b0, cordic_out, 1'b0};  // doubled because of f string
         end
 
         if (angle[BIT_WIDTH-2]) begin

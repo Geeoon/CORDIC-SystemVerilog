@@ -1,10 +1,10 @@
 /**
- * @file cordic_tb.sv
+ * @file cordic_sine_tb.sv
  * @author Geeoon Chung
- * @brief tests the cordic module
+ * @brief tests the cordic_sine module
  * @note uses a bit width of 32
  */
-module cordic_tb();
+module cordic_sine_tb();
     parameter CLOCK_PERIOD = 100;
     // inputs
     logic clk, reset, start;
@@ -12,9 +12,9 @@ module cordic_tb();
 
     // outputs
     logic ready, done;
-    logic [31:0] out_x, out_y;
+    logic [31:0] value;
 
-    cordic dut (.*);
+    cordic_sine dut (.*);
 
     initial begin
         clk <= 0;
@@ -38,43 +38,43 @@ module cordic_tb();
         @(posedge done);
         start = 0;
         $display("Results for angle = 0:");
-        $display("\t(%d, %d)", out_x, out_y);
+        $display("\t%d", value);
         repeat(2) @(posedge clk);
 
-        // testing angle pi / 4
+        // testing angle pi
         angle = 2**31;  // halfway
         start = 1;
         @(posedge done);
         start = 0;
-        $display("Results for angle = pi / 4:");
-        $display("\t(%d, %d)", out_x, out_y);
+        $display("Results for angle = pi:");
+        $display("\t%d", value);
         repeat(2) @(posedge clk);
 
-        // testing angle pi / 6
+        // testing angle 2pi / 3
         angle = 32'd1431655770;  // 1/3 the way
         start = 1;
         @(posedge done);
         start = 0;
-        $display("Results for angle = pi / 6:");
-        $display("\t(%d, %d)", out_x, out_y);
+        $display("Results for angle = 2pi / 3:");
+        $display("\t%d", value);
         repeat(2) @(posedge clk);
 
-        // testing angle pi / 3
+        // testing angle 4pi / 3
         angle = 32'd2863311540;  // 2/3 the way
         start = 1;
         @(posedge done);
         start = 0;
-        $display("Results for angle = pi / 3:");
-        $display("\t(%d, %d)", out_x, out_y);
+        $display("Results for angle = 4pi / 3:");
+        $display("\t%d", value);
         repeat(2) @(posedge clk);
         
-        // testing almost angle pi / 2
+        // testing almost angle 2pi
         angle = {{31{1'b1}}, 1'b0};
         start = 1;
         @(posedge done);
         start = 0;
-        $display("Results for angle = pi / 2:");
-        $display("\t(%d, %d)", out_x, out_y);
+        $display("Results for angle = 2pi - 0:");
+        $display("\t%d", value);
         repeat(2) @(posedge clk);
         
         $stop;
