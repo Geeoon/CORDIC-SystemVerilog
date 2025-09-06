@@ -24,7 +24,8 @@ module cordic_data
     // internal register with an extra bit due to signedness
     logic signed [BIT_WIDTH:0] x_reg, y_reg, shifted_x, shifted_y;
 
-    logic signed [BIT_WIDTH:0] target_reg, current;
+    logic [BIT_WIDTH-1:0] target_reg;
+    logic signed [BIT_WIDTH+1:0] current;  // signed and resistant to overflow
     logic [BIT_WIDTH-1:0] diff;
     // bit widths of 1, but at that point, you could just write a normal LUT
     logic [LOG_2_BIT_WIDTH-1:0] i;
@@ -33,13 +34,13 @@ module cordic_data
 
     always_ff @(posedge clk) begin
         if (add) begin
-            current <= current + {1'b0, diff};
+            current <= current + {2'b00, diff};
             x_reg <= x_reg - shifted_y;
             y_reg <= y_reg + shifted_x;
         end
 
         if (sub) begin
-            current <= current - {1'b0, diff};
+            current <= current - {2'b00, diff};
             x_reg <= x_reg + shifted_y;
             y_reg <= y_reg - shifted_x;
         end
@@ -59,12 +60,11 @@ module cordic_data
 
     always_comb begin
         reached_target = i == END_INDEX;
-        dir = current <= $signed({1'b0, target_reg});
+        dir = current <= $signed({2'b00, target_reg});
         if (x_reg[BIT_WIDTH]) begin
             // if its negative
             // convert to magnitude
-            // will be off by one
-            x = ~x_reg[BIT_WIDTH-1:0];  // + {{(BIT_WIDTH-2){1'b0}}, 1'b1};
+            x = -x_reg[BIT_WIDTH-1:0];
             shifted_x = x_reg >>> i;
         end else begin
             // if its positive
@@ -75,8 +75,7 @@ module cordic_data
         if (y_reg[BIT_WIDTH]) begin
             // if its negative
             // convert to magnitude
-            // will be off by one
-            y = ~y_reg[BIT_WIDTH-1:0];  // + {{(BIT_WIDTH-2){1'b0}}, 1'b1};
+            y = -y_reg[BIT_WIDTH-1:0];
             shifted_y = y_reg >>> i;
         end else begin
             // if its positive

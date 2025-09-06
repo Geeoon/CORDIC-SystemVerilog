@@ -67,6 +67,16 @@ module cordic_tb();
         $display("Results for angle = pi / 3:");
         $display("\t(%d, %d)", out_x, out_y);
         repeat(2) @(posedge clk);
+        
+        // testing almost angle pi / 2
+        angle = {{31{1'b1}}, 1'b0};
+        start = 1;
+        @(posedge done);
+        start = 0;
+        $display("Results for angle = pi / 2:");
+        $display("\t(%d, %d)", out_x, out_y);
+        repeat(2) @(posedge clk);
+        
         $stop;
     end  // initial
     

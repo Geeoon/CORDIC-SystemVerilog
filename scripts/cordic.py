@@ -1,7 +1,6 @@
 import math
 import argparse
 import pathlib
-import constants
 
 parser = argparse.ArgumentParser(description='Script to generate SystemVerilog and/or MIF files for CORDIC')
 parser.add_argument('--path', type=pathlib.Path, default=pathlib.Path.cwd(), required=False, help='The path of the output file(s)')
