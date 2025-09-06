@@ -4,7 +4,7 @@ import pathlib
 
 parser = argparse.ArgumentParser(description='Script to generate SystemVerilog and/or MIF files for CORDIC')
 parser.add_argument('-p', '--path', type=pathlib.Path, default=pathlib.Path.cwd(), required=False, help='the path of the output file(s)')
-parser.add_argument('-s', '--standalone', action='store_true', default=False, required=False, help='only generate the CORDIC core module.' \
+parser.add_argument('-s', '--standalone', action='store_true', default=False, required=False, help='only generate the CORDIC core module. ' \
                                                                                                     'also sets the bit width to be the ' \
                                                                                                     'bit width for the cordic module')
 parser.add_argument('bit_width', type=int, help='the bit width of the numbers (e.g., angle and out_x/out_y)')
