@@ -42,14 +42,13 @@ module cordic_ctrl
 
             s_compute: begin
                 if (reached_target) begin
-                    done = 1;  // saves a clock cycle but possibly causes a glitch
                     ns = s_init;
                 end else begin
-                    iter = 1;
-                    if (dir) add = 1;
-                    else sub = 1;
                     ns = s_compute;
                 end
+                iter = 1;
+                if (dir) add = 1;
+                else sub = 1;
             end  // s_compute
         endcase
     end  // always_comb

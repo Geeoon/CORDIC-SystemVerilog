@@ -7,6 +7,7 @@
 module cordic_data
     #(parameter BIT_WIDTH,
       parameter LOG_2_BIT_WIDTH,
+      parameter END_INDEX,
       parameter K)
     (clk, add, sub, iter, load_regs, target, x, y, reached_target, dir);
     /**
@@ -20,34 +21,34 @@ module cordic_data
     output logic [BIT_WIDTH-1:0] x, y;
     output logic reached_target, dir; 
 
-    // internal register with two extra bits due to pre-scaling and signedness
-    logic signed [BIT_WIDTH+1:0] x_reg, y_reg, shifted_x, shifted_y;
+    // internal register with an extra bit due to signedness
+    logic signed [BIT_WIDTH:0] x_reg, y_reg, shifted_x, shifted_y;
 
-    logic [BIT_WIDTH-1:0] target_reg, current;
-    logic [BIT_WIDTH-1:0] diff;  // technically if we make this -1 instead of -2, it will allow us to have
+    logic signed [BIT_WIDTH:0] target_reg, current;
+    logic [BIT_WIDTH-1:0] diff;
     // bit widths of 1, but at that point, you could just write a normal LUT
     logic [LOG_2_BIT_WIDTH-1:0] i;
 
+    cordic_lut #(.INPUT_WIDTH(LOG_2_BIT_WIDTH), .BIT_WIDTH(BIT_WIDTH)) step_lut (.index(i), .value(diff));
+
     always_ff @(posedge clk) begin
         if (add) begin
-            current <= current + diff;
+            current <= current + {1'b0, diff};
             x_reg <= x_reg - shifted_y;
             y_reg <= y_reg + shifted_x;
         end
 
         if (sub) begin
-            current <= current - diff;
+            current <= current - {1'b0, diff};
             x_reg <= x_reg + shifted_y;
             y_reg <= y_reg - shifted_x;
         end
 
         if (iter) begin
             i <= i + 1;
-            diff <= diff >> 1;
         end
 
         if (load_regs) begin
-            diff <= {1'b1, {(BIT_WIDTH-1){1'b0}}};
             current <= 0;
             target_reg <= target;
             x_reg <= K;
@@ -57,23 +58,25 @@ module cordic_data
     end  // always_ff
 
     always_comb begin
-        reached_target = i == {(LOG_2_BIT_WIDTH){1'b1}};
-        dir = current < target;
-        if (x_reg[BIT_WIDTH+1]) begin
+        reached_target = i == END_INDEX;
+        dir = current <= $signed({1'b0, target_reg});
+        if (x_reg[BIT_WIDTH]) begin
             // if its negative
-            // clip off the extra bit then convert to magnitude
-            x = ~x_reg[BIT_WIDTH-1:0] + {{(BIT_WIDTH-1){1'b0}}, 1'b1};
+            // convert to magnitude
+            // will be off by one
+            x = ~x_reg[BIT_WIDTH-1:0];  // + {{(BIT_WIDTH-2){1'b0}}, 1'b1};
             shifted_x = x_reg >>> i;
         end else begin
             // if its positive
-            shifted_x = x_reg >> i;
             x = x_reg[BIT_WIDTH-1:0];
+            shifted_x = x_reg >> i;
         end
 
-        if (y_reg[BIT_WIDTH+1]) begin
+        if (y_reg[BIT_WIDTH]) begin
             // if its negative
-            // clip off the extra bit then convert to magnitude
-            y = ~y_reg[BIT_WIDTH-1:0] + {{(BIT_WIDTH-1){1'b0}}, 1'b1};
+            // convert to magnitude
+            // will be off by one
+            y = ~y_reg[BIT_WIDTH-1:0];  // + {{(BIT_WIDTH-2){1'b0}}, 1'b1};
             shifted_y = y_reg >>> i;
         end else begin
             // if its positive
