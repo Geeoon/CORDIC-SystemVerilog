@@ -28,10 +28,10 @@ def calculate_steps(n: int) -> list[int]:
     """
     out: list[int] = []
     for i in range(n):
-        out.append(round(math.atan2(1, 2**i) * 2**n))
+        out.append(round(math.atan2(1, 2**i) * 2**(n+1) / math.pi))
     return out
 
-def convert_steps_to_lut(steps: list[int], n: list[int]) -> str:
+def convert_steps_to_lut(steps: list[int], n: int) -> str:
     """
     @brief converts a list of steps to a LUT
     @param steps a list of steps to convert
@@ -43,7 +43,7 @@ def convert_steps_to_lut(steps: list[int], n: list[int]) -> str:
     out += f"            default: value={n}'bx;"
     return out
 
-precomputed_K = math.floor(2**args.bit_width * compute_K(args.bit_width))  # floor because overestimating could result in overflows
+precomputed_K = math.floor((2**args.bit_width) * compute_K(args.bit_width))  # floor because overestimating could result in overflows
 log_2_bits = math.ceil(math.log2(args.bit_width))
 
 args.path.mkdir(parents=True, exist_ok=True)

@@ -24,8 +24,8 @@ module cordic_data
     // internal register with an extra bit due to signedness
     logic signed [BIT_WIDTH:0] x_reg, y_reg, shifted_x, shifted_y;
 
-    logic [BIT_WIDTH-1:0] target_reg;
     logic signed [BIT_WIDTH+1:0] current;  // signed and resistant to overflow
+    logic [BIT_WIDTH-1:0] target_reg;
     logic [BIT_WIDTH-1:0] diff;
     // bit widths of 1, but at that point, you could just write a normal LUT
     logic [LOG_2_BIT_WIDTH-1:0] i;
@@ -60,7 +60,7 @@ module cordic_data
 
     always_comb begin
         reached_target = i == END_INDEX;
-        dir = current <= $signed({2'b00, target_reg});
+        dir = current < $signed({2'b00, target_reg});
         if (x_reg[BIT_WIDTH]) begin
             // if its negative
             // convert to magnitude
