@@ -7,7 +7,6 @@
 module cordic_data
     #(parameter BIT_WIDTH,
       parameter LOG_2_BIT_WIDTH,
-      parameter END_INDEX,
       parameter K)
     (clk, add, sub, iter, load_regs, target, x, y, reached_target, dir);
     /**
@@ -59,7 +58,7 @@ module cordic_data
     end  // always_ff
 
     always_comb begin
-        reached_target = i == END_INDEX;
+        reached_target = i == (BIT_WIDTH - 1);
         dir = current < $signed({2'b00, target_reg});
         if (x_reg[BIT_WIDTH]) begin
             // if its negative

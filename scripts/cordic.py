@@ -75,7 +75,7 @@ with input_cordic_lut_filepath.open("r", encoding="utf-8") as file:
     cordic_lut_module = file.read()
 
 with output_cordic_filepath.open("w", encoding="utf-8") as file:
-    file.write(cordic_module.format(args.bit_width, log_2_bits, f"{log_2_bits}'d{args.bit_width - 1}", f"{args.bit_width+1}'sd{precomputed_K}"))
+    file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width+1}'sd{precomputed_K}"))
 
 with output_cordic_data_filepath.open("w", encoding="utf-8") as file:
     file.write(cordic_data_module)
