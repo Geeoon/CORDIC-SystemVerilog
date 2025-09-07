@@ -21,7 +21,7 @@ module cordic_data
     output logic reached_target, dir; 
 
     // internal register with an extra bit due to signedness
-    logic signed [BIT_WIDTH+1:0] x_reg, y_reg, shifted_x, shifted_y;
+    logic signed [BIT_WIDTH:0] x_reg, y_reg, shifted_x, shifted_y;
 
     logic signed [BIT_WIDTH+1:0] current;  // signed and resistant to overflow
     logic [BIT_WIDTH-1:0] target_reg;
