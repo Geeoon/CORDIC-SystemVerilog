@@ -39,6 +39,7 @@ def convert_steps_to_lut(steps: list[int], n: int) -> str:
     """
     @brief converts a list of steps to a LUT
     @param steps a list of steps to convert
+    @param n the number of bits for the output
     @return the SystemVerilog LUT as combinational logic
     """
     out = ""
@@ -47,51 +48,78 @@ def convert_steps_to_lut(steps: list[int], n: int) -> str:
     out += f"            default: value={n}'bx;"
     return out
 
+def convert_steps_to_array(steps: list[int], n: int) -> str:
+    """
+    @brief converts a list of steps to a SystemVerilog array
+    @param steps a list of steps to convert
+    @param n the number of bits for the output
+    @return the SystemVerilog array
+    """
+    assert(len(steps) > 0)
+    out = f"{{{n}'d{steps[0]}"
+    for step in steps[1:]:
+        out += f", {n}'d{step}"
+    out += "}"
+    return out
+
 if not args.standalone:
     args.bit_width -= 2
 precomputed_K = math.floor((2**args.bit_width) * compute_K(args.bit_width))
 log_2_bits = math.ceil(math.log2(args.bit_width))
 
 args.path.mkdir(parents=True, exist_ok=True)
+
 output_cordic_filepath = args.path / "cordic.sv"
-output_cordic_data_filepath = args.path / "cordic_data.sv"
-output_cordic_ctrl_filepath = args.path / "cordic_ctrl.sv"
-output_cordic_lut_filepath = args.path / "cordic_lut.sv"
-
 input_cordic_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic.sv"
-input_cordic_data_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic_data.sv"
-input_cordic_ctrl_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic_ctrl.sv"
-input_cordic_lut_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic_lut.sv"
-
 cordic_module: str = None
 cordic_data_module: str = None
 cordic_ctrl_module: str = None
 cordic_lut_module: str = None
-
+cordic_stage_module: str = None
 with input_cordic_filepath.open("r", encoding="utf-8") as file:
     cordic_module = file.read()
 
-with input_cordic_data_filepath.open("r", encoding="utf-8") as file:
-    cordic_data_module = file.read()
+if not args.pipelined:
+    output_cordic_data_filepath = args.path / "cordic_data.sv"
+    output_cordic_ctrl_filepath = args.path / "cordic_ctrl.sv"
+    output_cordic_lut_filepath = args.path / "cordic_lut.sv"
 
-with input_cordic_ctrl_filepath.open("r", encoding="utf-8") as file:
-    cordic_ctrl_module = file.read()
+    input_cordic_data_filepath = pathlib.Path().cwd() / f"../src/cordic_core/non-pipelined/cordic_data.sv"
+    input_cordic_ctrl_filepath = pathlib.Path().cwd() / f"../src/cordic_core/non-pipelined/cordic_ctrl.sv"
+    input_cordic_lut_filepath = pathlib.Path().cwd() / f"../src/cordic_core/non-pipelined/cordic_lut.sv"
 
-with input_cordic_lut_filepath.open("r", encoding="utf-8") as file:
-    cordic_lut_module = file.read()
+    with input_cordic_data_filepath.open("r", encoding="utf-8") as file:
+        cordic_data_module = file.read()
+
+    with input_cordic_ctrl_filepath.open("r", encoding="utf-8") as file:
+        cordic_ctrl_module = file.read()
+
+    with input_cordic_lut_filepath.open("r", encoding="utf-8") as file:
+        cordic_lut_module = file.read()
+
+
+    with output_cordic_data_filepath.open("w", encoding="utf-8") as file:
+        file.write(cordic_data_module)
+
+    with output_cordic_ctrl_filepath.open("w", encoding="utf-8") as file:
+        file.write(cordic_ctrl_module)
+
+    with output_cordic_lut_filepath.open("w", encoding="utf-8") as file:
+        file.write(cordic_lut_module.format(convert_steps_to_lut(calculate_steps(args.bit_width), args.bit_width)))
+else:
+    output_cordic_stage_filepath = args.path / "cordic_stage.sv"
+    input_cordic_stage_filepath = pathlib.Path().cwd() / f"../src/cordic_core/pipelined/cordic_stage.sv"
+    with input_cordic_stage_filepath.open("r", encoding="utf-8") as file:
+        cordic_stage_module = file.read()
+    with output_cordic_stage_filepath.open("w", encoding="utf-8") as file:
+        file.write(cordic_stage_module)
 
 
 with output_cordic_filepath.open("w", encoding="utf-8") as file:
-    file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width+1}'sd{precomputed_K}"))
-
-with output_cordic_data_filepath.open("w", encoding="utf-8") as file:
-    file.write(cordic_data_module)
-
-with output_cordic_ctrl_filepath.open("w", encoding="utf-8") as file:
-    file.write(cordic_ctrl_module)
-
-with output_cordic_lut_filepath.open("w", encoding="utf-8") as file:
-    file.write(cordic_lut_module.format(convert_steps_to_lut(calculate_steps(args.bit_width), args.bit_width)))
+    if args.pipelined:
+        file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width+1}'sd{precomputed_K}", convert_steps_to_array(calculate_steps(args.bit_width), args.bit_width)))
+    else:
+        file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width+1}'sd{precomputed_K}"))
 
 
 if not args.standalone:

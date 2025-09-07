@@ -6,9 +6,9 @@
  */
 
 module cordic
-    #(parameter BIT_WIDTH=30, 
-      parameter LOG_2_BIT_WIDTH=5,
-      parameter K=31'sd652032874)
+    #(parameter BIT_WIDTH={}, 
+      parameter LOG_2_BIT_WIDTH={},
+      parameter K={})
     (clk, reset, start, angle, out_x, out_y, ready, done);
     /**
      * @brief computes the coordinates of a rotation using CORDIC with support for pipelining.  Only positive outputs (quadrant I)
@@ -45,7 +45,7 @@ module cordic
     logic pause;
 
     // table of steps
-    localparam int STEPS [BIT_WIDTH] = {30'd536870912, 30'd316933406, 30'd167458907, 30'd85004756, 30'd42667331, 30'd21354465, 30'd10679838, 30'd5340245, 30'd2670163, 30'd1335087, 30'd667544, 30'd333772, 30'd166886, 30'd83443, 30'd41722, 30'd20861, 30'd10430, 30'd5215, 30'd2608, 30'd1304, 30'd652, 30'd326, 30'd163, 30'd81, 30'd41, 30'd20, 30'd10, 30'd5, 30'd3, 30'd1};
+    localparam int STEPS [BIT_WIDTH] = {};
 
     logic [BIT_WIDTH-1:0] target_angles [0:BIT_WIDTH];
     logic signed [BIT_WIDTH+1:0] current_angles [0:BIT_WIDTH];

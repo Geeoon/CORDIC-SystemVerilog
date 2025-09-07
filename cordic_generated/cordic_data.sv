@@ -21,7 +21,7 @@ module cordic_data
     output logic reached_target, dir; 
 
     // internal register with an extra bit due to signedness
-    logic signed [BIT_WIDTH+1:0] x_reg, y_reg, shifted_x, shifted_y;
+    logic signed [BIT_WIDTH:0] x_reg, y_reg, shifted_x, shifted_y;
 
     logic signed [BIT_WIDTH+1:0] current;  // signed and resistant to overflow
     logic [BIT_WIDTH-1:0] target_reg;
@@ -60,16 +60,16 @@ module cordic_data
     always_comb begin
         reached_target = i == (BIT_WIDTH - 1);
         dir = current < $signed({2'b00, target_reg});
+        shifted_x = x_reg >>> i;
+        shifted_y = y_reg >>> i;
         if (x_reg[BIT_WIDTH]) begin
             // if its negative
             // convert to magnitude
             // x = -x_reg[BIT_WIDTH-1:0];
             x = ~x_reg[BIT_WIDTH-1:0];  // this method is off by one but faster and won't overflow
-            shifted_x = x_reg >>> i;
         end else begin
             // if its positive
             x = x_reg[BIT_WIDTH-1:0];
-            shifted_x = x_reg >> i;
         end
 
         if (y_reg[BIT_WIDTH]) begin
@@ -77,11 +77,9 @@ module cordic_data
             // convert to magnitude
             // y = -y_reg[BIT_WIDTH-1:0];
             y = ~y_reg[BIT_WIDTH-1:0];// this method is off by one but faster and won't overflow
-            shifted_y = y_reg >>> i;
         end else begin
             // if its positive
             y = y_reg[BIT_WIDTH-1:0];
-            shifted_y = y_reg >> i;
         end 
     end  // always_comb
 

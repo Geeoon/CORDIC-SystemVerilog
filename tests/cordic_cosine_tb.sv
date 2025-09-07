@@ -39,7 +39,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = 0:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing angle pi
         angle = 2**31;  // halfway
@@ -48,7 +48,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = pi:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing angle 2pi / 3
         angle = 32'd1431655770;  // 1/3 the way
@@ -57,7 +57,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = 2pi / 3:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing angle 4pi / 3
         angle = 32'd2863311540;  // 2/3 the way
@@ -66,7 +66,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = 4pi / 3:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
         
         // testing almost angle 2pi
         angle = {{31{1'b1}}, 1'b0};
@@ -75,7 +75,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = 2pi - 0:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
         
         $stop;
     end  // initial

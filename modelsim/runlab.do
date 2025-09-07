@@ -20,8 +20,8 @@ vsim -voptargs="+acc" -t 1ps -lib work cordic_cosine_tb -Lf altera_mf_ver
 #     the module you are testing.
 # do cordic_wave.do
 # do cordic_sine_wave.do
-do cordic_cosine_wave.do
-
+# do cordic_cosine_wave.do
+do cordic_cosine_pipelined_wave.do
 
 # Set the window types
 view wave

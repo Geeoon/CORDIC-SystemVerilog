@@ -39,7 +39,7 @@ module cordic_tb();
         start = 0;
         $display("Results for angle = 0:");
         $display("\t(%d, %d)", out_x, out_y);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing angle pi / 4
         angle = 2**31;  // halfway
@@ -48,7 +48,8 @@ module cordic_tb();
         start = 0;
         $display("Results for angle = pi / 4:");
         $display("\t(%d, %d)", out_x, out_y);
-        repeat(2) @(posedge clk);
+        @(negedge done);
+
 
         // testing angle pi / 6
         angle = 32'd1431655770;  // 1/3 the way
@@ -57,7 +58,7 @@ module cordic_tb();
         start = 0;
         $display("Results for angle = pi / 6:");
         $display("\t(%d, %d)", out_x, out_y);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing angle pi / 3
         angle = 32'd2863311540;  // 2/3 the way
@@ -66,7 +67,7 @@ module cordic_tb();
         start = 0;
         $display("Results for angle = pi / 3:");
         $display("\t(%d, %d)", out_x, out_y);
-        repeat(2) @(posedge clk);
+        @(negedge done);
         
         // testing almost angle pi / 2
         angle = {{31{1'b1}}, 1'b0};
@@ -75,7 +76,7 @@ module cordic_tb();
         start = 0;
         $display("Results for angle = pi / 2:");
         $display("\t(%d, %d)", out_x, out_y);
-        repeat(2) @(posedge clk);
+        @(negedge done);
         
         $stop;
     end  // initial
