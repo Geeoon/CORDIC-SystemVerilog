@@ -1,7 +1,7 @@
 # CORDIC Implementation for SystemVerilog
 This project implements various functions using CORDIC for SystemVerilog:
- * Sine
- * Cosine
+* Sine
+* Cosine
 
 ## Usage
 Run the `cordic.py` script in `scripts`.
@@ -27,3 +27,8 @@ If you just want to the pregenerated modules, they are located in coric_generate
 The testbenches for the cordic, sine, and cosine modules are located in `tests`.
 
 Has not been tested on hardware.
+
+## TODOs
+* Pipelining
+* Calculate timing
+* Test on hardware
