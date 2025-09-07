@@ -3,10 +3,13 @@ This project implements various functions using CORDIC for SystemVerilog:
 * Sine
 * Cosine
 
+## Features
+* Support for pipelining
+
 ## Usage
 Run the `cordic.py` script in `scripts`.
 ```
-usage: cordic.py [-h] [-p PATH] [-s] bit_width
+usage: cordic.py [-h] [-p PATH] [-s] [-i] bit_width
 
 Script to generate SystemVerilog and/or MIF files for CORDIC
 
@@ -17,7 +20,8 @@ options:
   -h, --help            show this help message and exit
   -p PATH, --path PATH  the path of the output file(s)
   -s, --standalone      only generate the CORDIC core module. also sets the bit width to be the bit width for the cordic module
-```
+  -i, --pipelined       enables pipelining for the CORDIC core modules
+  ```
 
 This will generate the .sv files.
 
@@ -29,6 +33,5 @@ The testbenches for the cordic, sine, and cosine modules are located in `tests`.
 Has not been tested on hardware.
 
 ## TODOs
-* Pipelining
 * Calculate timing
 * Test on hardware
