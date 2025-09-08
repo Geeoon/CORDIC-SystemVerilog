@@ -13,7 +13,8 @@ vlog "./**/*.sv"
 #     testbench module you want to execute.
 # vsim -voptargs="+acc" -t 1ps -lib work cordic_tb -Lf altera_mf_ver
 # vsim -voptargs="+acc" -t 1ps -lib work cordic_sine_tb -Lf altera_mf_ver
-vsim -voptargs="+acc" -t 1ps -lib work cordic_cosine_tb -Lf altera_mf_ver
+# vsim -voptargs="+acc" -t 1ps -lib work cordic_cosine_tb -Lf altera_mf_ver
+vsim -voptargs="+acc" -t 1ps -lib work cordic_vec_tb -Lf altera_mf_ver
 
 # Source the wave do file
 #     This should be the file that sets up the signal window for
@@ -21,7 +22,8 @@ vsim -voptargs="+acc" -t 1ps -lib work cordic_cosine_tb -Lf altera_mf_ver
 # do cordic_wave.do
 # do cordic_sine_wave.do
 # do cordic_cosine_wave.do
-do cordic_cosine_pipelined_wave.do
+# do cordic_cosine_pipelined_wave.do
+do cordic_vec_wave.do
 
 # Set the window types
 view wave

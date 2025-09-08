@@ -27,7 +27,6 @@ module cordic
      * @input   clk the clock driving the sequential logic
      * @input   reset an active high synchronous reset
      * @input	start 1 to start the calculation
-     * @note    start will not do anything if done is 0
      * @input   angle the input angle.  width = DATA_WIDTH
      * @output  out_x the x coordinate output.  width = BIT_WIDTH
      * @output  out_y the y coordinate output.  width = BIT_WIDTH

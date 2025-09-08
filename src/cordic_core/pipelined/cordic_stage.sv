@@ -81,4 +81,4 @@ module cordic_stage
         shifted_y = in_y >>> SHIFT_NUM;
     end  // always_comb
 
-endmodule
+endmodule  // cordic_stage
