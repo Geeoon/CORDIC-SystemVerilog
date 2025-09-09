@@ -62,9 +62,8 @@ def convert_steps_to_array(steps: list[int], n: int) -> str:
     out += "}"
     return out
 
-if not args.standalone:
-    args.bit_width -= 2
-precomputed_K = math.floor((2**args.bit_width) * compute_K(args.bit_width))
+# minus 1 due to signeness
+precomputed_K = math.floor((2**(args.bit_width-1)) * compute_K(args.bit_width) * .99999)  # x .99999 to prevent overflows
 log_2_bits = math.ceil(math.log2(args.bit_width))
 
 args.path.mkdir(parents=True, exist_ok=True)
@@ -133,16 +132,14 @@ else:
 
 with output_cordic_filepath.open("w", encoding="utf-8") as file:
     if args.pipelined:
-        file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width+1}'sd{precomputed_K}", convert_steps_to_array(calculate_steps(args.bit_width), args.bit_width)))
+        file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width}'sd{precomputed_K}", convert_steps_to_array(calculate_steps(args.bit_width), args.bit_width)))
         # TODO: implement pipelined 
     else:
-        file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width+1}'sd{precomputed_K}"))
+        file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width}'sd{precomputed_K}"))
         file.write(cordic_vec_module.format(args.bit_width, log_2_bits, precomputed_K))
 
 
 if not args.standalone:
-    args.bit_width += 2
-
     output_cordic_sine_filepath = args.path / "cordic_sine.sv"
     output_cordic_cosine_filepath = args.path / "cordic_cosine.sv"
 
@@ -160,7 +157,7 @@ if not args.standalone:
 
 
     with output_cordic_sine_filepath.open("w", encoding="utf-8") as file:
-        file.write(cordic_sine_module.format(args.bit_width, log_2_bits, f"{args.bit_width-1}'sd{precomputed_K}"))
+        file.write(cordic_sine_module.format(args.bit_width, log_2_bits, f"{args.bit_width}'sd{precomputed_K}"))
 
     with output_cordic_cosine_filepath.open("w", encoding="utf-8") as file:
-        file.write(cordic_cosine_module.format(args.bit_width, log_2_bits, f"{args.bit_width-1}'sd{precomputed_K}"))
+        file.write(cordic_cosine_module.format(args.bit_width, log_2_bits, f"{args.bit_width}'sd{precomputed_K}"))
