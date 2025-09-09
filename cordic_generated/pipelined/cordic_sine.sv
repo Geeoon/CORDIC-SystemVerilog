@@ -1,16 +1,16 @@
 /**
- * @file cordic_cosine.sv
+ * @file cordic_sine.sv
  * @author Geeoon Chung
- * @brief this file implements the cordic_cosine module
+ * @brief this file implements the cordic_sine module
  */
 
-module cordic_cosine
-    #(parameter BIT_WIDTH={}, 
-      parameter LOG_2_BIT_WIDTH={},
-      parameter K={})
+module cordic_sine
+    #(parameter BIT_WIDTH=32, 
+      parameter LOG_2_BIT_WIDTH=5,
+      parameter K=32'sd1304052707)
     (clk, reset, start, angle, value, ready, done);
     /**
-     * @brief computes the cosine of an angle using CORDIC
+     * @brief computes the sine of an angle using CORDIC
      * @param   BIT_WIDTH the width of the input and the output
      * @param   LOG_2_BIT log base 2 of the bit width
      * @param   K the precomputed K constant
@@ -41,8 +41,8 @@ module cordic_cosine
              .angle,
              .in_x(K),
              .in_y(0),
-             .out_x(cordic_out),  // unused
-             .out_y(),
+             .out_x(),  // unused
+             .out_y(cordic_out),
              .ready(cordic_ready),
              .done(cordic_done));
 
@@ -60,4 +60,4 @@ module cordic_cosine
             done <= cordic_done;
         end
     end  // always_ff
-endmodule  // cordic_cosine
+endmodule  // cordic_sine

@@ -1,30 +1,28 @@
 /**
- * @file cordic_data.sv
+ * @file cordic_vec_data.sv
  * @author Geeoon Chung
  * @brief implements the cordic_data module, the datapath for the cordic module
  */
 
-module cordic_data
+module cordic_vec_data
     #(parameter BIT_WIDTH,
-      parameter LOG_2_BIT_WIDTH,
-      parameter K)
-    (clk, add, sub, iter, load_regs, target, x, y, reached_target, dir);
+      parameter LOG_2_BIT_WIDTH)
+    (clk, add, sub, iter, load_regs, in_x, in_y, phase, magnitude, reached_target, dir);
     /**
      * @brief controlpath for the cordic module
      * @see ASMD chart
      * @note signals documented in the ASMD chart
      */
     input logic clk, add, sub, iter, load_regs;
-    input logic [BIT_WIDTH-1:0] target;
+    input logic [BIT_WIDTH-1:0] in_x, in_y;
 
-    output logic [BIT_WIDTH-1:0] x, y;
+    output logic [BIT_WIDTH-1:0] phase, magnitude;
     output logic reached_target, dir; 
 
     // internal register with an extra bit due to signedness
     logic signed [BIT_WIDTH:0] x_reg, y_reg, shifted_x, shifted_y;
 
     logic signed [BIT_WIDTH+1:0] current;  // signed and resistant to overflow
-    logic [BIT_WIDTH-1:0] target_reg;
     logic [BIT_WIDTH-1:0] diff;
     // bit widths of 1, but at that point, you could just write a normal LUT
     logic [LOG_2_BIT_WIDTH-1:0] i;
@@ -50,37 +48,20 @@ module cordic_data
 
         if (load_regs) begin
             current <= 0;
-            target_reg <= target;
-            x_reg <= K;
-            y_reg <= 0;
+            x_reg <= {1'b0, in_x};
+            y_reg <= {1'b0, in_y};
             i <= 0;
         end
     end  // always_ff
 
     always_comb begin
         reached_target = i == (BIT_WIDTH - 1);
-        dir = current < $signed({2'b00, target_reg});
+        dir = y_reg[BIT_WIDTH];  // if y is negative
         shifted_x = x_reg >>> i;
         shifted_y = y_reg >>> i;
-        if (x_reg[BIT_WIDTH]) begin
-            // if its negative
-            // convert to magnitude
-            // x = -x_reg[BIT_WIDTH-1:0];
-            x = ~x_reg[BIT_WIDTH-1:0];  // this method is off by one but faster and won't overflow
-        end else begin
-            // if its positive
-            x = x_reg[BIT_WIDTH-1:0];
-        end
+        phase = current;
+        magnitude = y_reg;
 
-        if (y_reg[BIT_WIDTH]) begin
-            // if its negative
-            // convert to magnitude
-            // y = -y_reg[BIT_WIDTH-1:0];
-            y = ~y_reg[BIT_WIDTH-1:0];// this method is off by one but faster and won't overflow
-        end else begin
-            // if its positive
-            y = y_reg[BIT_WIDTH-1:0];
-        end 
     end  // always_comb
 
-endmodule  // cordic_data
+endmodule  // cordic_vec_data

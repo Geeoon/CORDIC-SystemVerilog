@@ -2,11 +2,9 @@ import math
 import argparse
 import pathlib
 
-parser = argparse.ArgumentParser(description='Script to generate SystemVerilog and/or MIF files for CORDIC')
+parser = argparse.ArgumentParser(description='Script to generate a CORDIC implementation in SystemVerilog')
 parser.add_argument('-p', '--path', type=pathlib.Path, default=pathlib.Path.cwd(), required=False, help='the path of the output file(s)')
-parser.add_argument('-s', '--standalone', action='store_true', default=False, required=False, help='only generate the CORDIC core module. ' \
-                                                                                                    'also sets the bit width to be the ' \
-                                                                                                    'bit width for the cordic module')
+parser.add_argument('-s', '--standalone', action='store_true', default=False, required=False, help='only generate the CORDIC core module')
 parser.add_argument('-i', '--pipelined', action='store_true', default=False, required=False, help='enables pipelining for the CORDIC core modules')
 parser.add_argument('bit_width', type=int, help='the bit width of the numbers (e.g., angle and out_x/out_y)')
 args = parser.parse_args()
@@ -70,9 +68,9 @@ args.path.mkdir(parents=True, exist_ok=True)
 
 output_cordic_filepath = args.path / "cordic.sv"
 output_cordic_vec_filepath = args.path / "cordic_vec.sv"
-input_cordic_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic.sv"
-# input_cordic_vec_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic_vec.sv"
-input_cordic_vec_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if False else 'non-pipelined'}/cordic_vec.sv"
+input_cordic_filepath = pathlib.Path().cwd() / f"../rtl/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic.sv"
+# input_cordic_vec_filepath = pathlib.Path().cwd() / f"../rtl/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic_vec.sv"
+input_cordic_vec_filepath = pathlib.Path().cwd() / f"../rtl/cordic_core/{'pipelined' if False else 'non-pipelined'}/cordic_vec.sv"
 
 cordic_module: str = None
 cordic_vec_module: str = None
@@ -92,10 +90,10 @@ if not args.pipelined:
     output_cordic_lut_filepath = args.path / "cordic_lut.sv"
     output_cordic_vec_data_filepath = args.path / "cordic_vec_data.sv"
 
-    input_cordic_data_filepath = pathlib.Path().cwd() / f"../src/cordic_core/non-pipelined/cordic_data.sv"
-    input_cordic_ctrl_filepath = pathlib.Path().cwd() / f"../src/cordic_core/non-pipelined/cordic_ctrl.sv"
-    input_cordic_lut_filepath = pathlib.Path().cwd() / f"../src/cordic_core/non-pipelined/cordic_lut.sv"
-    input_cordic_vec_data_filepath = pathlib.Path().cwd() / f"../src/cordic_core/non-pipelined/cordic_vec_data.sv"
+    input_cordic_data_filepath = pathlib.Path().cwd() / f"../rtl/cordic_core/non-pipelined/cordic_data.sv"
+    input_cordic_ctrl_filepath = pathlib.Path().cwd() / f"../rtl/cordic_core/non-pipelined/cordic_ctrl.sv"
+    input_cordic_lut_filepath = pathlib.Path().cwd() / f"../rtl/cordic_core/non-pipelined/cordic_lut.sv"
+    input_cordic_vec_data_filepath = pathlib.Path().cwd() / f"../rtl/cordic_core/non-pipelined/cordic_vec_data.sv"
 
     with input_cordic_data_filepath.open("r", encoding="utf-8") as file:
         cordic_data_module = file.read()
@@ -123,7 +121,7 @@ if not args.pipelined:
         file.write(cordic_vec_data_module)
 else:
     output_cordic_stage_filepath = args.path / "cordic_stage.sv"
-    input_cordic_stage_filepath = pathlib.Path().cwd() / f"../src/cordic_core/pipelined/cordic_stage.sv"
+    input_cordic_stage_filepath = pathlib.Path().cwd() / f"../rtl/cordic_core/pipelined/cordic_stage.sv"
     with input_cordic_stage_filepath.open("r", encoding="utf-8") as file:
         cordic_stage_module = file.read()
     with output_cordic_stage_filepath.open("w", encoding="utf-8") as file:
@@ -143,8 +141,8 @@ if not args.standalone:
     output_cordic_sine_filepath = args.path / "cordic_sine.sv"
     output_cordic_cosine_filepath = args.path / "cordic_cosine.sv"
 
-    input_cordic_sine_filepath = pathlib.Path().cwd() / "../src/trig/cordic_sine.sv"
-    input_cordic_cosine_filepath = pathlib.Path().cwd() / "../src/trig/cordic_cosine.sv"
+    input_cordic_sine_filepath = pathlib.Path().cwd() / "../rtl/trig/cordic_sine.sv"
+    input_cordic_cosine_filepath = pathlib.Path().cwd() / "../rtl/trig/cordic_cosine.sv"
 
     cordic_sine_module: str = None
     cordic_cosine_module: str = None
