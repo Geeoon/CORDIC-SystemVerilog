@@ -134,7 +134,7 @@ with output_cordic_filepath.open("w", encoding="utf-8") as file:
         # TODO: implement pipelined 
     else:
         file.write(cordic_module.format(args.bit_width, log_2_bits, f"{args.bit_width}'sd{precomputed_K}"))
-        file.write(cordic_vec_module.format(args.bit_width, log_2_bits, precomputed_K))
+        # file.write(cordic_vec_module.format(args.bit_width, log_2_bits, precomputed_K))
 
 
 if not args.standalone:

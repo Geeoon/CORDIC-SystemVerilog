@@ -41,8 +41,8 @@ module cordic_cosine
              .angle,
              .in_x(K),
              .in_y(0),
-             .out_x(cordic_out),  // unused
-             .out_y(),
+             .out_x(cordic_out),
+             .out_y(),  // unused
              .ready(cordic_ready),
              .done(cordic_done));
 

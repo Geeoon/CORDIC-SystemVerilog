@@ -11,84 +11,72 @@ module cordic
       parameter K=32'sd1304052707)
     (clk, reset, start, angle, in_x, in_y, out_x, out_y, ready, done);
     /**
-     * @brief computes the coordinates of a rotation using CORDIC.  Only positive outputs (quadrant I)
-     * @param   BIT_WIDTH the width of the output data.
-     *          Trigonometric output of 0 = 0
-     *          Trigonometric output of 1 = 2^BIT_WIDTH - 1
-     *		AND
-     *          the width of the angle (scaled to the first quadrant).
-     *          0 radians = 0
-     *          pi / 4 radians = 2^(BIT_WIDTH-1)
-     *          pi / 2 radians - 0 = 2^BIT_WIDTH - 1
-     *          where "- 0" signifies a small value
+     * @brief computes the coordinates of a rotation using CORDIC with support for pipelining.  Only positive outputs (quadrant I)
+     * @note    because the CORDIC algorithm applies a gain, do not supply values that are larger than the max_value * K
+     * @param   BIT_WIDTH the width of the input and output data.
      * @note    do not set the BIT_WIDTH to be greater than the default.  doing so will likely cause errors
      * @note    update the the rest of the parameters when you update any of them
      * @note    updating the parameters will result in lower effiency.  it is better to regenerate the files 
      * @input   clk the clock driving the sequential logic
      * @input   reset an active high synchronous reset
      * @input	start 1 to start the calculation
-     * @note    start will not do anything if done is 0
-     * @input   angle the input angle.  width = DATA_WIDTH
+     * @input   angle the angle to rotate by max value means almost pi / 4, min value means almost -pi / 4
      * @input   in_x the input x coordinate, set to K for sine/cosine
      * @input   in_y the input y coordinate of the vector to rotate.  set to 0 for sine/cosine
-     * @output  out_x the x coordinate output.  width = BIT_WIDTH
-     * @output  out_y the y coordinate output.  width = BIT_WIDTH
-     * @output  ready 1 if the module is ready. at this point, start will cause a computation to begin
+     * @todo    mess with changing to horizontal/vertical for sine/cosine instead of using a phase
+     * @output  out_x the x coordinate output
+     * @output  out_y the y coordinate output
+     * @note    the output will be scaled by 1/K
+     * @output  ready 1 if the module is ready.  always ready due to pipelining
      * @output  done 1 if the out_x and out_y registers can be read
      */
 	input logic clk, reset, start;
-	input logic [BIT_WIDTH-1:0] angle, in_x, in_y;
+	input logic signed [BIT_WIDTH-1:0] angle, in_x, in_y;
 
-    output logic [BIT_WIDTH-1:0] out_x, out_y;
+    output logic signed [BIT_WIDTH-1:0] out_x, out_y;
 	output logic ready, done;
 
-    logic reached_target, dir, iter, load_regs, add, sub;
-	cordic_ctrl #(.BIT_WIDTH(BIT_WIDTH)) controller (.clk, .reset, .start, .reached_target, .dir, .iter, .load_regs, .add, .sub, .ready, .done);
-	cordic_data #(.BIT_WIDTH(BIT_WIDTH), .LOG_2_BIT_WIDTH(LOG_2_BIT_WIDTH), .K(K)) datapath (.clk, .add, .sub, .iter, .load_regs, .target(angle), .in_x, .in_y, .x(out_x), .y(out_y), .reached_target, .dir);
+    assign ready = 1;  // pipelined
+
+    logic pause;
+
+    // table of steps
+    localparam int STEPS [BIT_WIDTH] = {32'd1073741824, 32'd633866811, 32'd334917815, 32'd170009512, 32'd85334662, 32'd42708931, 32'd21359677, 32'd10680490, 32'd5340327, 32'd2670173, 32'd1335088, 32'd667544, 32'd333772, 32'd166886, 32'd83443, 32'd41722, 32'd20861, 32'd10430, 32'd5215, 32'd2608, 32'd1304, 32'd652, 32'd326, 32'd163, 32'd81, 32'd41, 32'd20, 32'd10, 32'd5, 32'd3, 32'd1, 32'd1};
+
+    logic signed [BIT_WIDTH-1:0] target_angles [0:BIT_WIDTH];
+    logic signed [BIT_WIDTH:0] current_angles [0:BIT_WIDTH];
+    logic signed [BIT_WIDTH-1:0] out_xs [0:BIT_WIDTH];
+    logic signed [BIT_WIDTH-1:0] out_ys [0:BIT_WIDTH];
+    logic dones [0:BIT_WIDTH];
+
+    assign target_angles[0] = angle;
+    assign current_angles[0] = 0;
+    assign out_xs[0] = in_x;
+    assign out_ys[0] = in_y;
+    assign dones[0] = start;
+    assign pause = ~(start & dones[BIT_WIDTH]);
+    assign done = dones[BIT_WIDTH];
+
+    genvar i;
+    generate
+        for (i = 0; i < BIT_WIDTH; i++) begin
+            cordic_stage #(.BIT_WIDTH(BIT_WIDTH), .STEP(STEPS[i]), .SHIFT_NUM(i))
+            cordic_stage_i (.clk,
+                            .start(pause),
+                            .reset,
+                            .in_target_angle(target_angles[i]),
+                            .in_current_angle(current_angles[i]),
+                            .in_x(out_xs[i]),
+                            .in_y(out_ys[i]),
+                            .in_done(dones[i]),
+                            .out_target_angle(target_angles[i+1]),  // we could disconnect the last one as an optimization
+                            .out_current_angle(current_angles[i+1]),
+                            .out_x(out_xs[i+1]),
+                            .out_y(out_ys[i+1]),
+                            .out_done(dones[i+1]));
+        end
+    endgenerate
+
+    assign out_x = out_xs[BIT_WIDTH];
+    assign out_y = out_ys[BIT_WIDTH];
 endmodule  // cordic
-/**
- * @file cordic_vec.sv
- * @author Geeoon Chung
- * @brief implements the cordic_vec module
- * @see https://en.wikipedia.org/wiki/CORDIC
- */
-
-module cordic_vec
-    #(parameter BIT_WIDTH=32, 
-      parameter LOG_2_BIT_WIDTH=5)
-    (clk, reset, start, in_x, in_y, phase, magnitude, ready, done);
-    /**
-     * @brief computes the magnitude (with gain) and phase of a vector.  Only positive outputs (quadrant I)
-     * @note the algorithm introduces a 1304052707 gain to the output
-     * @param   BIT_WIDTH the width of the output phase.
-     *          the width of the angle (scaled to the first quadrant).
-     *          0 radians = 0
-     *          pi / 4 radians = 2^(BIT_WIDTH-1)
-     *          pi / 2 radians - 0 = 2^BIT_WIDTH - 1
-     *          where "- 0" signifies a small value
-     *		AND
-     *          the width of the x and y points of the vector.
-     * @note    do not set the BIT_WIDTH to be greater than the default.  doing so will likely cause errors
-     * @note    update the the rest of the parameters when you update any of them
-     * @note    updating the parameters will result in lower effiency.  it is better to regenerate the files 
-     * @input   clk the clock driving the sequential logic
-     * @input   reset an active high synchronous reset
-     * @input	start 1 to start the calculation
-     * @note    start will not do anything if done is 0
-     * @input   in_x the input x coordinate
-     * @input   in_y the input y coordinate
-     * @output  phase the phase/angle of the vector
-     * @output  magnitude the magnitude of the vector
-     * @output  ready 1 if the module is ready. at this point, start will cause a computation to begin
-     * @output  done 1 if the out_x and out_y registers can be read
-     */
-	input logic clk, reset, start;
-	input logic [BIT_WIDTH-1:0] in_x, in_y;
-
-    output logic [BIT_WIDTH-1:0] phase, magnitude;
-	output logic ready, done;
-
-    logic reached_target, dir, iter, load_regs, add, sub;
-	cordic_ctrl #(.BIT_WIDTH(BIT_WIDTH)) controller (.clk, .reset, .start, .reached_target, .dir, .iter, .load_regs, .add, .sub, .ready, .done);
-	cordic_vec_data #(.BIT_WIDTH(BIT_WIDTH), .LOG_2_BIT_WIDTH(LOG_2_BIT_WIDTH)) datapath (.clk, .add, .sub, .iter, .load_regs, .in_x, .in_y, .phase, .magnitude, .reached_target, .dir);
-endmodule  // cordic_vec
