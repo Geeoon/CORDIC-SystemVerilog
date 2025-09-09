@@ -11,12 +11,12 @@ parser.add_argument('-i', '--pipelined', action='store_true', default=False, req
 parser.add_argument('bit_width', type=int, help='the bit width of the numbers (e.g., angle and out_x/out_y)')
 args = parser.parse_args()
 
-assert(args.bit_width >= 2)  # otherwise HDL will be messed up 
+assert(args.bit_width >= 2)  # otherwise HDL will be messed up
 
 def compute_K(n: int) -> float:
     """
     @brief computes the constant K
-    @param n the bit width/# ofiterations
+    @param n the bit width/# of iterations
     @return the constant K
     """
     k = 1.0
@@ -27,12 +27,12 @@ def compute_K(n: int) -> float:
 def calculate_steps(n: int) -> list[int]:
     """
     @brief computes the step values
-    @param n the bit width/# ofiterations
+    @param n the bit width/# of iterations
     @return the step values
     """
     out: list[int] = []
     for i in range(n):
-        out.append(round(math.atan2(1, 2**i) * 2**(n+1) / math.pi))
+        out.append(round(math.atan2(1, 2**i) * 2**n / math.pi))
     return out
 
 def convert_steps_to_lut(steps: list[int], n: int) -> str:
@@ -72,7 +72,9 @@ args.path.mkdir(parents=True, exist_ok=True)
 output_cordic_filepath = args.path / "cordic.sv"
 output_cordic_vec_filepath = args.path / "cordic_vec.sv"
 input_cordic_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic.sv"
-input_cordic_vec_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic_vec.sv"
+# input_cordic_vec_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if args.pipelined else 'non-pipelined'}/cordic_vec.sv"
+input_cordic_vec_filepath = pathlib.Path().cwd() / f"../src/cordic_core/{'pipelined' if False else 'non-pipelined'}/cordic_vec.sv"
+
 cordic_module: str = None
 cordic_vec_module: str = None
 cordic_data_module: str = None

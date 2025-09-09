@@ -39,20 +39,21 @@ module cordic_stage
      * @output  out_done whether or not the output is the result of a real calculation
      */
     input logic clk, reset, start;
-    input logic [BIT_WIDTH-1:0] in_target_angle;
-    input logic signed [BIT_WIDTH+1:0] in_current_angle;
-    input logic signed [BIT_WIDTH:0] in_x, in_y;
+    input logic signed [BIT_WIDTH-1:0] in_target_angle;
+    input logic signed [BIT_WIDTH:0] in_current_angle;  // extra for overflow protection
+    input logic signed [BIT_WIDTH-1:0] in_x, in_y;
     input logic in_done;
 
-    output logic [BIT_WIDTH-1:0] out_target_angle;
-    output logic [BIT_WIDTH+1:0] out_current_angle;
-    output logic signed [BIT_WIDTH:0] out_x, out_y;
+    output logic signed [BIT_WIDTH-1:0] out_target_angle;
+    output logic signed [BIT_WIDTH:0] out_current_angle;  // extra bit for overflow protection
+    output logic signed [BIT_WIDTH-1:0] out_x, out_y;
     output logic out_done;
 
-    logic signed [BIT_WIDTH:0] shifted_x, shifted_y;
+    logic signed [BIT_WIDTH-1:0] shifted_x, shifted_y;
     logic add;
 
-    assign add = in_current_angle < $signed({2'b00, in_target_angle});
+    // extend the MSB to match the bit widths
+    assign add = in_current_angle < $signed({in_target_angle[BIT_WIDTH-1], in_target_angle});
 
     always_ff @(posedge clk) begin
         if (reset) begin
@@ -65,20 +66,18 @@ module cordic_stage
             out_target_angle <= in_target_angle;
             out_done <= in_done;
             if (add) begin
-                out_current_angle <= in_current_angle + {2'b00, STEP};
+                out_current_angle <= in_current_angle + {3'b00, STEP};
                 out_x <= in_x - shifted_y;
                 out_y <= in_y + shifted_x;
             end else begin
-                out_current_angle <= in_current_angle - {2'b00, STEP};
+                out_current_angle <= in_current_angle - {3'b00, STEP};
                 out_x <= in_x + shifted_y;
                 out_y <= in_y - shifted_x;
             end
         end
     end  // always_ff
 
-    always_comb begin
-        shifted_x = in_x >>> SHIFT_NUM;
-        shifted_y = in_y >>> SHIFT_NUM;
-    end  // always_comb
+    assign shifted_x = in_x >>> SHIFT_NUM;
+    assign shifted_y = in_y >>> SHIFT_NUM;
 
 endmodule  // cordic_stage
