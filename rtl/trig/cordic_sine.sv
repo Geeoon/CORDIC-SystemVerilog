@@ -38,9 +38,11 @@ module cordic_sine
             (.clk,
              .reset,
              .start,
-             .angle,
+             .in_angle(angle),
              .in_x(K),
              .in_y(0),
+             .mode(1'b0),
+             .out_angle(),  // unused
              .out_x(),  // unused
              .out_y(cordic_out),
              .ready(cordic_ready),

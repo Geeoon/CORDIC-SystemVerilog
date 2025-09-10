@@ -6,9 +6,9 @@ add wave -noupdate /cordic_cosine_tb/start
 add wave -noupdate -radix unsigned /cordic_cosine_tb/angle
 add wave -noupdate /cordic_cosine_tb/ready
 add wave -noupdate /cordic_cosine_tb/done
-add wave -noupdate -radix decimal /cordic_cosine_tb/value
+add wave -noupdate /cordic_cosine_tb/value
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {3350 ps} 0}
+WaveRestoreCursors {{Cursor 1} {43050 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 120
 configure wave -valuecolwidth 100
@@ -24,4 +24,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {18008 ps}
+WaveRestoreZoom {0 ps} {48773 ps}

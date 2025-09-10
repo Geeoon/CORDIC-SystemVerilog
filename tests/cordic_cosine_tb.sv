@@ -39,7 +39,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = 0:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing angle pi / 4
         angle = 32'sd1073741824;
@@ -48,7 +48,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = pi / 4:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing angle -pi / 4
         angle = -32'sd1073741824;
@@ -57,7 +57,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = -pi / 4:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing angle pi / 3
         angle = 32'sd1431655770;
@@ -66,7 +66,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = pi / 3:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing angle 2pi / 3
         angle = 32'sd2863311540;
@@ -75,7 +75,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = 2pi / 3:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
         
         // testing almost angle pi / 2
         angle = {1'b0, {31{1'b1}}};
@@ -84,7 +84,7 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = pi / 2");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
 
         // testing almost angle -pi / 2
         angle = {1'b1, 31'b0};
@@ -93,7 +93,8 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = -pi / 2:");
         $display("\t%d", value);
-        repeat(2) @(posedge clk);
+        @(negedge done);
+        repeat(2) @(posedge clk)
         
         $stop;
     end  // initial

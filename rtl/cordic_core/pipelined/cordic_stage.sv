@@ -9,7 +9,7 @@ module cordic_stage
     #(parameter BIT_WIDTH, 
       parameter STEP,
       parameter SHIFT_NUM)
-    (clk, reset, start, in_target_angle, in_current_angle, in_x, in_y, in_done, out_target_angle, out_current_angle, out_x, out_y, out_done);
+    (clk, reset, start, in_target_angle, in_current_angle, in_x, in_y, in_mode, in_done, out_target_angle, out_current_angle, out_x, out_y, out_mode, out_done);
     /**
      * @brief a single stage of the CORDIC pipeline
      * @param   BIT_WIDTH the width of the output data.
@@ -31,29 +31,35 @@ module cordic_stage
      * @input   in_current_angle the angle from the last stage
      * @input   in_x the x coordinate input from the last stage
      * @input   in_y the y coordinate input from the last stage
+     * @input   in_mode whether or not the last stage's output was the reuslt of rotation mode (low) or vectoring mode (high)
      * @input   in_done whether or not the last stage's output was the result of a real calculation
      * @output  out_target_angle the target angle
      * @output  out_current_angle the output angle from this stage
      * @output  out_x the x coordinate output
      * @output  out_y the y coordinate output
+     * @output  out_mode whether or not the output is the result of rotation mode (low) or vectoing mode (high)
      * @output  out_done whether or not the output is the result of a real calculation
      */
     input logic clk, reset, start;
     input logic signed [BIT_WIDTH-1:0] in_target_angle;
     input logic signed [BIT_WIDTH:0] in_current_angle;  // extra for overflow protection
     input logic signed [BIT_WIDTH-1:0] in_x, in_y;
-    input logic in_done;
+    input logic in_mode, in_done;
 
     output logic signed [BIT_WIDTH-1:0] out_target_angle;
     output logic signed [BIT_WIDTH:0] out_current_angle;  // extra bit for overflow protection
     output logic signed [BIT_WIDTH-1:0] out_x, out_y;
-    output logic out_done;
+    output logic out_mode, out_done;
 
     logic signed [BIT_WIDTH-1:0] shifted_x, shifted_y;
     logic add;
 
     // extend the MSB to match the bit widths
-    assign add = in_current_angle < $signed({in_target_angle[BIT_WIDTH-1], in_target_angle});
+    always_comb begin
+        if (in_mode) add = in_y < 32'sd0;
+        else add = in_current_angle < $signed({in_target_angle[BIT_WIDTH-1], in_target_angle});
+    end
+    
 
     always_ff @(posedge clk) begin
         if (reset) begin
@@ -61,16 +67,20 @@ module cordic_stage
             out_current_angle <= 0;
             out_x <= 0;
             out_y <= 0;
+            out_mode <= 0;
             out_done <= 0;
         end else if (start & (in_done | out_done)) begin  // in_done | ~out_done is not required, it's only here to save power
             out_target_angle <= in_target_angle;
+            out_mode <= in_mode;
             out_done <= in_done;
             if (add) begin
-                out_current_angle <= in_current_angle + {3'b00, STEP};
+                if (in_mode) out_current_angle <= in_current_angle - {3'b00, STEP};
+                else out_current_angle <= in_current_angle + {3'b00, STEP};
                 out_x <= in_x - shifted_y;
                 out_y <= in_y + shifted_x;
             end else begin
-                out_current_angle <= in_current_angle - {3'b00, STEP};
+                if (in_mode) out_current_angle <= in_current_angle + {3'b00, STEP};
+                else out_current_angle <= in_current_angle - {3'b00, STEP};
                 out_x <= in_x + shifted_y;
                 out_y <= in_y - shifted_x;
             end

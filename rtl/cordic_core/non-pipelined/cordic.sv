@@ -9,7 +9,7 @@ module cordic
     #(parameter BIT_WIDTH={}, 
       parameter LOG_2_BIT_WIDTH={},
       parameter K={})
-    (clk, reset, start, angle, in_x, in_y, out_x, out_y, ready, done);
+    (clk, reset, start, in_angle, in_x, in_y, mode, out_angle, out_x, out_y, ready, done);
     /**
      * @brief computes the coordinates of a rotation using CORDIC.  Only positive outputs (quadrant I)
      * @param   BIT_WIDTH the width of the output data.
@@ -28,21 +28,23 @@ module cordic
      * @input   reset an active high synchronous reset
      * @input	start 1 to start the calculation
      * @note    start will not do anything if done is 0
-     * @input   angle the input angle.  width = DATA_WIDTH
+     * @input   in_angle the input angle
      * @input   in_x the input x coordinate, set to K for sine/cosine
      * @input   in_y the input y coordinate of the vector to rotate.  set to 0 for sine/cosine
-     * @output  out_x the x coordinate output.  width = BIT_WIDTH
-     * @output  out_y the y coordinate output.  width = BIT_WIDTH
+     * @input   mode high for vectoring mode, low for rotation mode
+     * @output  out_angle the output angle
+     * @output  out_x the x coordinate output
+     * @output  out_y the y coordinate output
      * @output  ready 1 if the module is ready. at this point, start will cause a computation to begin
      * @output  done 1 if the out_x and out_y registers can be read
      */
-	input logic clk, reset, start;
-	input logic [BIT_WIDTH-1:0] angle, in_x, in_y;
+	input logic clk, reset, start, mode;
+	input logic [BIT_WIDTH-1:0] in_angle, in_x, in_y;
 
-    output logic [BIT_WIDTH-1:0] out_x, out_y;
+    output logic [BIT_WIDTH-1:0] out_angle, out_x, out_y;
 	output logic ready, done;
 
     logic reached_target, dir, iter, load_regs, add, sub;
 	cordic_ctrl #(.BIT_WIDTH(BIT_WIDTH)) controller (.clk, .reset, .start, .reached_target, .dir, .iter, .load_regs, .add, .sub, .ready, .done);
-	cordic_data #(.BIT_WIDTH(BIT_WIDTH), .LOG_2_BIT_WIDTH(LOG_2_BIT_WIDTH), .K(K)) datapath (.clk, .add, .sub, .iter, .load_regs, .target(angle), .in_x, .in_y, .x(out_x), .y(out_y), .reached_target, .dir);
+	cordic_data #(.BIT_WIDTH(BIT_WIDTH), .LOG_2_BIT_WIDTH(LOG_2_BIT_WIDTH), .K(K)) datapath (.clk, .add, .sub, .iter, .load_regs, .in_angle, .in_x, .in_y, .mode, .out_angle, .out_x, .out_y, .reached_target, .dir);
 endmodule  // cordic

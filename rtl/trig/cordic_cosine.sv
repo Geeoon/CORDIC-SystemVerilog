@@ -38,9 +38,11 @@ module cordic_cosine
             (.clk,
              .reset,
              .start,
-             .angle,
+             .in_angle(angle),
              .in_x(K),
              .in_y(0),
+             .mode(1'b0),  // rotation mode
+             .out_angle(),  // unused
              .out_x(cordic_out),
              .out_y(),  // unused
              .ready(cordic_ready),
