@@ -48,18 +48,17 @@ module cordic_stage
 
     output logic signed [BIT_WIDTH-1:0] out_target_angle;
     output logic signed [BIT_WIDTH:0] out_current_angle;  // extra bit for overflow protection
-    output logic signed [BIT_WIDTH-1:0] out_x, out_y;
+    output logic signed [BIT_WIDTH-1:0] out_x, out_y;  // could extend this one bit and add overflow protection on the main cordic module
     output logic out_mode, out_done;
 
     logic signed [BIT_WIDTH-1:0] shifted_x, shifted_y;
     logic add;
 
-    // extend the MSB to match the bit widths
     always_comb begin
-        if (in_mode) add = in_y < 32'sd0;
+        if (in_mode) add = in_y[BIT_WIDTH-1];
+        // extend the MSB to match the bit widths
         else add = in_current_angle < $signed({in_target_angle[BIT_WIDTH-1], in_target_angle});
     end
-    
 
     always_ff @(posedge clk) begin
         if (reset) begin

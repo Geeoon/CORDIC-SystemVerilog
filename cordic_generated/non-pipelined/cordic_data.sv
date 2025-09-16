@@ -63,11 +63,20 @@ module cordic_data
     assign shifted_x = x_reg >>> i;
     assign shifted_y = y_reg >>> i;
     assign reached_target = i == (BIT_WIDTH - 1);
-    assign x = x_reg;
-    assign y = y_reg;
-    assign out_angle = current;
+    assign out_x = x_reg;
+    assign out_y = y_reg;
     always_comb begin
-        if (mode) dir = y < 32'sd0;
+        // default behavior, remove MSB
+        out_angle = $signed({{current[BIT_WIDTH], current[BIT_WIDTH-2:0]}});
+        // this part below will clip values outside of the output range
+        if (current[BIT_WIDTH]) begin
+            // if it's negative and the MSB is set to 0 (meaning it is at least too negative)
+            if (~current[BIT_WIDTH-1]) out_angle = $signed({{1'b1, {{BIT_WIDTH-1{{1'b0}}}}}});
+        end else begin
+            // if it's positive and the MSB is set to 1 (meaning it is at least too large)
+            if (current[BIT_WIDTH-1]) out_angle = $signed({{1'b0, {{BIT_WIDTH-1{{1'b1}}}}}});
+        end
+        if (mode) dir = out_y[BIT_WIDTH-1];
         else dir = current < $signed({target_reg[BIT_WIDTH-1], target_reg});
     end
 endmodule  // cordic_data

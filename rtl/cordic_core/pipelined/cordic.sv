@@ -52,6 +52,10 @@ module cordic
     logic modes [0:BIT_WIDTH];
     logic dones [0:BIT_WIDTH];
 
+    // just for simplifying syntax
+    logic signed [BIT_WIDTH:0] last_current_angle;
+    assign last_current_angle = current_angles[BIT_WIDTH];
+
     assign target_angles[0] = in_angle;
     assign current_angles[0] = 0;
     assign out_xs[0] = in_x;
@@ -83,6 +87,18 @@ module cordic
         end
     endgenerate
 
+    always_comb begin
+        // default behavior, remove MSB
+        out_angle = $signed({{last_current_angle[BIT_WIDTH], last_current_angle[BIT_WIDTH-2:0]}});
+        // this part below will clip values outside of the output range
+        if (last_current_angle[BIT_WIDTH]) begin
+            // if it's negative and the MSB is set to 0 (meaning it is at least too negative)
+            if (~last_current_angle[BIT_WIDTH-1]) out_angle = $signed({{1'b1, {{BIT_WIDTH-1{{1'b0}}}}}});
+        end else begin
+            // if it's positive and the MSB is set to 1 (meaning it is at least too large)
+            if (last_current_angle[BIT_WIDTH-1]) out_angle = $signed({{1'b0, {{BIT_WIDTH-1{{1'b1}}}}}});
+        end
+    end  // always_comb
     assign out_x = out_xs[BIT_WIDTH];
     assign out_y = out_ys[BIT_WIDTH];
 endmodule  // cordic

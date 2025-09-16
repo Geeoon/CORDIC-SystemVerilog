@@ -4,24 +4,20 @@ add wave -noupdate /cordic_tb/clk
 add wave -noupdate /cordic_tb/reset
 add wave -noupdate /cordic_tb/start
 add wave -noupdate /cordic_tb/done
-add wave -noupdate -radix decimal -childformat {{{/cordic_tb/angle[31]} -radix unsigned} {{/cordic_tb/angle[30]} -radix unsigned} {{/cordic_tb/angle[29]} -radix unsigned} {{/cordic_tb/angle[28]} -radix unsigned} {{/cordic_tb/angle[27]} -radix unsigned} {{/cordic_tb/angle[26]} -radix unsigned} {{/cordic_tb/angle[25]} -radix unsigned} {{/cordic_tb/angle[24]} -radix unsigned} {{/cordic_tb/angle[23]} -radix unsigned} {{/cordic_tb/angle[22]} -radix unsigned} {{/cordic_tb/angle[21]} -radix unsigned} {{/cordic_tb/angle[20]} -radix unsigned} {{/cordic_tb/angle[19]} -radix unsigned} {{/cordic_tb/angle[18]} -radix unsigned} {{/cordic_tb/angle[17]} -radix unsigned} {{/cordic_tb/angle[16]} -radix unsigned} {{/cordic_tb/angle[15]} -radix unsigned} {{/cordic_tb/angle[14]} -radix unsigned} {{/cordic_tb/angle[13]} -radix unsigned} {{/cordic_tb/angle[12]} -radix unsigned} {{/cordic_tb/angle[11]} -radix unsigned} {{/cordic_tb/angle[10]} -radix unsigned} {{/cordic_tb/angle[9]} -radix unsigned} {{/cordic_tb/angle[8]} -radix unsigned} {{/cordic_tb/angle[7]} -radix unsigned} {{/cordic_tb/angle[6]} -radix unsigned} {{/cordic_tb/angle[5]} -radix unsigned} {{/cordic_tb/angle[4]} -radix unsigned} {{/cordic_tb/angle[3]} -radix unsigned} {{/cordic_tb/angle[2]} -radix unsigned} {{/cordic_tb/angle[1]} -radix unsigned} {{/cordic_tb/angle[0]} -radix unsigned}} -subitemconfig {{/cordic_tb/angle[31]} {-height 15 -radix unsigned} {/cordic_tb/angle[30]} {-height 15 -radix unsigned} {/cordic_tb/angle[29]} {-height 15 -radix unsigned} {/cordic_tb/angle[28]} {-height 15 -radix unsigned} {/cordic_tb/angle[27]} {-height 15 -radix unsigned} {/cordic_tb/angle[26]} {-height 15 -radix unsigned} {/cordic_tb/angle[25]} {-height 15 -radix unsigned} {/cordic_tb/angle[24]} {-height 15 -radix unsigned} {/cordic_tb/angle[23]} {-height 15 -radix unsigned} {/cordic_tb/angle[22]} {-height 15 -radix unsigned} {/cordic_tb/angle[21]} {-height 15 -radix unsigned} {/cordic_tb/angle[20]} {-height 15 -radix unsigned} {/cordic_tb/angle[19]} {-height 15 -radix unsigned} {/cordic_tb/angle[18]} {-height 15 -radix unsigned} {/cordic_tb/angle[17]} {-height 15 -radix unsigned} {/cordic_tb/angle[16]} {-height 15 -radix unsigned} {/cordic_tb/angle[15]} {-height 15 -radix unsigned} {/cordic_tb/angle[14]} {-height 15 -radix unsigned} {/cordic_tb/angle[13]} {-height 15 -radix unsigned} {/cordic_tb/angle[12]} {-height 15 -radix unsigned} {/cordic_tb/angle[11]} {-height 15 -radix unsigned} {/cordic_tb/angle[10]} {-height 15 -radix unsigned} {/cordic_tb/angle[9]} {-height 15 -radix unsigned} {/cordic_tb/angle[8]} {-height 15 -radix unsigned} {/cordic_tb/angle[7]} {-height 15 -radix unsigned} {/cordic_tb/angle[6]} {-height 15 -radix unsigned} {/cordic_tb/angle[5]} {-height 15 -radix unsigned} {/cordic_tb/angle[4]} {-height 15 -radix unsigned} {/cordic_tb/angle[3]} {-height 15 -radix unsigned} {/cordic_tb/angle[2]} {-height 15 -radix unsigned} {/cordic_tb/angle[1]} {-height 15 -radix unsigned} {/cordic_tb/angle[0]} {-height 15 -radix unsigned}} /cordic_tb/angle
+add wave -noupdate /cordic_tb/dut/in_angle
 add wave -noupdate -radix decimal /cordic_tb/in_x
 add wave -noupdate -radix decimal /cordic_tb/in_y
 add wave -noupdate -radix decimal /cordic_tb/out_x
 add wave -noupdate -radix decimal /cordic_tb/out_y
-add wave -noupdate -radix decimal /cordic_tb/dut/datapath/current
-add wave -noupdate -radix decimal /cordic_tb/dut/datapath/target_reg
-add wave -noupdate -radix unsigned /cordic_tb/dut/datapath/i
-add wave -noupdate -radix unsigned /cordic_tb/dut/datapath/diff
-add wave -noupdate -radix decimal /cordic_tb/dut/datapath/shifted_x
-add wave -noupdate -radix decimal /cordic_tb/dut/datapath/shifted_y
-add wave -noupdate -radix decimal /cordic_tb/dut/datapath/x_reg
-add wave -noupdate -radix decimal /cordic_tb/dut/datapath/y_reg
+add wave -noupdate /cordic_tb/dut/out_angle
+add wave -noupdate /cordic_tb/dut/current_angles
+add wave -noupdate /cordic_tb/dut/out_ys
+add wave -noupdate -radix decimal /cordic_tb/dut/last_current_angle
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {187 ps} 0}
+WaveRestoreCursors {{Cursor 1} {2832 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
-configure wave -valuecolwidth 100
+configure wave -valuecolwidth 123
 configure wave -justifyvalue left
 configure wave -signalnamewidth 1
 configure wave -snapdistance 10
@@ -34,4 +30,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {2110 ps}
+WaveRestoreZoom {0 ps} {68618 ps}
