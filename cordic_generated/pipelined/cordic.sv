@@ -23,7 +23,6 @@ module cordic
      * @input   in_angle the input angle
      * @input   in_x the input x coordinate, set to K for sine/cosine
      * @input   in_y the input y coordinate of the vector to rotate.  set to 0 for sine/cosine
-     * @todo    mess with changing to horizontal/vertical for sine/cosine instead of using a phase
      * @input   mode high for vectoring mode, low for rotation mode
      * @output  out_angle the output angle
      * @output  out_x the x coordinate output

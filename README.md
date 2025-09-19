@@ -4,7 +4,11 @@ This project implements various functions using CORDIC for SystemVerilog:
 * Cosine
 
 ## Features
-* Support for pipelining
+* Generation script for custom input and output bit widths
+* Pipelined and non-pipelined versions
+  * Pipelined is good for high throughput
+  * Non-pipelined is good for low resource usage
+  * Both have the same latency
 
 ## Usage
 Run the `cordic.py` script in `scripts`.
@@ -33,10 +37,9 @@ The testbenches for the cordic, sine, and cosine modules are located in `tests`.
 Has not been tested on hardware.
 
 ## TODOs
-* calculate timing
-* test on hardware
-* vectoring mode
-* atan
+* calculate timing in Quartus
+* test on hardware (DE1-SoC)
+* Custom number of iterations (currently equals bit width)
 * polar to Cartesian
 * division
 * hyperbolic?
