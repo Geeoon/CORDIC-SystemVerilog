@@ -9,7 +9,7 @@ parser.add_argument('-i', '--pipelined', action='store_true', default=False, req
 parser.add_argument('bit_width', type=int, help='the bit width of the numbers (e.g., angle and out_x/out_y)')
 args = parser.parse_args()
 
-assert(args.bit_width >= 2)  # otherwise HDL will be messed up
+assert(args.bit_width >= 3)  # otherwise HDL will be messed up
 
 def compute_K(n: int) -> float:
     """
@@ -123,12 +123,15 @@ with output_cordic_filepath.open("w", encoding="utf-8") as file:
 if not args.standalone:
     output_cordic_sine_filepath = args.path / "cordic_sine.sv"
     output_cordic_cosine_filepath = args.path / "cordic_cosine.sv"
+    output_cordic_atan2_filepath = args.path / "cordic_atan2.sv"
 
     input_cordic_sine_filepath = pathlib.Path().cwd() / "../rtl/trig/cordic_sine.sv"
     input_cordic_cosine_filepath = pathlib.Path().cwd() / "../rtl/trig/cordic_cosine.sv"
+    input_cordic_atan2_filepath = pathlib.Path().cwd() / "../rtl/trig/cordic_atan2.sv"
 
     cordic_sine_module: str = None
     cordic_cosine_module: str = None
+    cordic_atan2_module: str = None
 
     with input_cordic_sine_filepath.open("r", encoding="utf-8") as file:
         cordic_sine_module = file.read()
@@ -136,9 +139,16 @@ if not args.standalone:
     with input_cordic_cosine_filepath.open("r", encoding="utf-8") as file:
         cordic_cosine_module = file.read()
 
+    with input_cordic_atan2_filepath.open("r", encoding="utf-8") as file:
+        cordic_atan2_module = file.read()
+
 
     with output_cordic_sine_filepath.open("w", encoding="utf-8") as file:
         file.write(cordic_sine_module.format(args.bit_width, log_2_bits, f"{args.bit_width}'sd{precomputed_K}"))
 
     with output_cordic_cosine_filepath.open("w", encoding="utf-8") as file:
         file.write(cordic_cosine_module.format(args.bit_width, log_2_bits, f"{args.bit_width}'sd{precomputed_K}"))
+
+    with output_cordic_atan2_filepath.open("w", encoding="utf-8") as file:
+        file.write(cordic_atan2_module.format(args.bit_width, log_2_bits, f"{args.bit_width}'sd{precomputed_K}"))
+        
