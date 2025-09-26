@@ -2,6 +2,7 @@
 This project implements various functions using CORDIC for SystemVerilog:
 * Sine
 * Cosine
+* Arctangent (atan2)
 
 ## Features
 * Generation script for custom input and output bit widths
@@ -32,7 +33,7 @@ This will generate the .sv files.
 Pre-generated 32-bit CORDIC modules are in the `cordic_generated` directory.
 
 ## Running Tests
-The testbenches for the cordic, sine, and cosine modules are located in `tests`.
+The testbenches for the cordic, sine, cosine, and atan2 modules are located in `tests`.
 
 Has not been tested on hardware.
 
@@ -40,6 +41,5 @@ Has not been tested on hardware.
 * calculate timing in Quartus
 * test on hardware (DE1-SoC)
 * Custom number of iterations (currently equals bit width)
-* polar to Cartesian
 * division
-* hyperbolic?
+* hyperbolic

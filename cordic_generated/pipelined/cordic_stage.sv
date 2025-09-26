@@ -1,8 +1,7 @@
 /**
- * @file cordic.sv
+ * @file cordic_stage.sv
  * @author Geeoon Chung
  * @brief implements the cordic_stage module
- * @see https://en.wikipedia.org/wiki/CORDIC
  */
 
 module cordic_stage
