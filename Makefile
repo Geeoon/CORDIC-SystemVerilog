@@ -1,4 +1,4 @@
-HDL_DIR := ./temp
+HDL_DIR := ./rtl/cordic_core/pipelined
 BUILD_DIR := ./build
 SIM_DIR := ./tests
 HDL_FILES := $(shell find $(HDL_DIR) -name '*.sv' -or -name '*.v' -or -name '*.svh')

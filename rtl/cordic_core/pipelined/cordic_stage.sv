@@ -52,41 +52,50 @@ module cordic_stage #(
     output  logic                           out_mode,
     output  logic                           out_done
 );
+    typedef enum logic { C_CLOCKWISE, CLOCKWISE } rotation_dir_t;
+    rotation_dir_t rotation_dir;
+
     // signals
     logic signed [BIT_WIDTH-1:0] shifted_x, shifted_y;
-    logic add;
+
+    // wires
+    assign shifted_x = in_x >>> SHIFT_NUM;
+    assign shifted_y = in_y >>> SHIFT_NUM;
 
     always_comb begin
-        shifted_x = in_x >>> SHIFT_NUM;
-        shifted_y = in_y >>> SHIFT_NUM;
-        if (in_mode) add = in_y[BIT_WIDTH-1];
-        // extend the MSB to match the bit widths
-        else add = in_current_angle < $signed({in_target_angle[BIT_WIDTH-1], in_target_angle});
+        if (in_mode) begin  // vectoring mode
+            rotation_dir = in_y[BIT_WIDTH-1] ? C_CLOCKWISE : CLOCKWISE;
+        end else begin  // rotation mode
+            // sign-extend in_target_angle to match bit widths
+            rotation_dir = (in_current_angle < $signed({in_target_angle[BIT_WIDTH-1], in_target_angle})) ? C_CLOCKWISE : CLOCKWISE;
+        end
     end
 
     always_ff @(posedge clk) begin
         if (reset) begin
             out_target_angle <= 0;
+            out_mode <= 0;
+            out_done <= 0;
+
             out_current_angle <= 0;
             out_x <= 0;
             out_y <= 0;
-            out_mode <= 0;
-            out_done <= 0;
         end else if (start & (in_done | out_done)) begin  // in_done | ~out_done is not required, it's only here to save power
             out_target_angle <= in_target_angle;
             out_mode <= in_mode;
             out_done <= in_done;
-            if (add) begin
-                if (in_mode) out_current_angle <= in_current_angle - {3'b000, STEP};
-                else out_current_angle <= in_current_angle + {3'b000, STEP};
-                out_x <= in_x - shifted_y;
-                out_y <= in_y + shifted_x;
-            end else begin
-                if (in_mode) out_current_angle <= in_current_angle + {3'b000, STEP};
-                else out_current_angle <= in_current_angle - {3'b000, STEP};
-                out_x <= in_x + shifted_y;
-                out_y <= in_y - shifted_x;
-            end
+            case (rotation_dir)
+                C_CLOCKWISE : begin
+                    // [TODO] repalce in_mode with enum for readability
+                    out_current_angle <= in_mode ? in_current_angle - {3'b000, STEP} : in_current_angle + {3'b000, STEP};
+                    out_x             <= in_x - shifted_y;
+                    out_y             <= in_y + shifted_x;
+                end CLOCKWISE : begin
+                    out_current_angle <= in_mode ? in_current_angle + {3'b000, STEP} : in_current_angle - {3'b000, STEP};
+                    out_x             <= in_x + shifted_y;
+                    out_y             <= in_y - shifted_x;
+                end
+            endcase
         end
     end  // always_ff
 endmodule  // cordic_stage
