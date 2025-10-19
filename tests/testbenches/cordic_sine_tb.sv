@@ -1,11 +1,16 @@
 /**
- * @file cordic_cosine_tb.sv
+ * @file cordic_sine_tb.sv
  * @author Geeoon Chung
- * @brief tests the cordic_cosine module
+ * @brief tests the cordic_sine module
  * @note uses a bit width of 32
  */
-module cordic_cosine_tb();
+
+import cordic_tb_helper::*;
+
+module cordic_sine_tb();
     parameter CLOCK_PERIOD = 100;
+    parameter ITERATIONS = 32;
+
     // inputs
     logic clk, reset, start;
     logic signed [31:0] angle;
@@ -14,7 +19,9 @@ module cordic_cosine_tb();
     logic ready, done;
     logic signed [31:0] value;
 
-    cordic_cosine dut (.*);
+    cordic_sine #(
+      .ITERATIONS(ITERATIONS)  
+    ) dut (.*);
 
     initial begin
         clk <= 0;
@@ -39,6 +46,8 @@ module cordic_cosine_tb();
         start = 0;
         $display("Results for angle = 0:");
         $display("\t%d", value);
+        $display(real'(value) / 2.0**(ITERATIONS-1));
+        assert(almost_equal(real'(value) / 2.0**(ITERATIONS-1), $sin(0)));
         @(negedge done);
 
         // testing angle pi / 4
@@ -49,6 +58,7 @@ module cordic_cosine_tb();
         $display("Results for angle = pi / 4:");
         $display("\t%d", value);
         @(negedge done);
+
 
         // testing angle -pi / 4
         angle = -32'sd1073741824;
@@ -96,7 +106,9 @@ module cordic_cosine_tb();
         @(negedge done);
         repeat(2) @(posedge clk)
         
-        $stop;
+        $dumpfile("cordic_sine_tb.vcd");
+        $dumpvars;
+        $finish;
     end  // initial
     
-endmodule  // cordic_cosine_tb
+endmodule  // cordic_sine_tb

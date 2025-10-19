@@ -128,7 +128,7 @@ module cordic_atan2_tb();
         @(negedge done);
 
         repeat(2) @(posedge clk);
-        $stop;
+        $finish;
     end  // initial
     
 endmodule  // cordic_atan2_tb

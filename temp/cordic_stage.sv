@@ -1,7 +1,7 @@
 /**
  * @file cordic_stage.sv
  * @author Geeoon Chung
- * @brief a single stage of the CORDIC pipeline
+ * @brief   a single stage of the CORDIC pipeline
  * @param   BIT_WIDTH the width of the output data.
  *          Trigonometric output of 0 = 0
  *          Trigonometric output of 1 = 2^BIT_WIDTH - 1
@@ -32,40 +32,43 @@
  */
 
 module cordic_stage #(
-    parameter BIT_WIDTH, 
+    parameter BIT_WIDTH,
     parameter STEP,
     parameter SHIFT_NUM
 ) (
-    input  logic clk, 
-    input  logic reset, 
-    input  logic start, 
-
-    input  logic signed [BIT_WIDTH-1:0] in_target_angle, 
-    input  logic signed [BIT_WIDTH:0] in_current_angle, // extra for overflow protection
-    input  logic signed [BIT_WIDTH-1:0] in_x, 
-    input  logic signed [BIT_WIDTH-1:0] in_y, 
-    input  logic in_mode, // 0 = rotation mode, 1 = vectoring mode [TODO] replace with enum
-    input  logic in_done, 
-
-    output logic signed [BIT_WIDTH-1:0] out_target_angle, 
-    output logic signed [BIT_WIDTH:0] out_current_angle, // extra bit for overflow protection
-    output logic signed [BIT_WIDTH-1:0]out_x, // could extend this one bit and add overflow protection on the main cordic module
-    output logic signed [BIT_WIDTH-1:0]out_y, // could extend this one bit and add overflow protection on the main cordic module
-    output logic out_mode, 
-    output logic out_done
+    input   logic                           clk,
+    input   logic                           reset,
+    input   logic                           start,
+    input   logic signed [BIT_WIDTH-1:0]    in_target_angle,
+    input   logic signed [BIT_WIDTH:0]      in_current_angle,
+    input   logic signed [BIT_WIDTH-1:0]    in_x,
+    input   logic signed [BIT_WIDTH-1:0]    in_y,
+    input   logic                           in_mode,
+    input   logic                           in_done,
+    output  logic signed [BIT_WIDTH-1:0]    out_target_angle,
+    output  logic signed [BIT_WIDTH:0]      out_current_angle,
+    output  logic signed [BIT_WIDTH-1:0]    out_x,
+    output  logic signed [BIT_WIDTH-1:0]    out_y,
+    output  logic                           out_mode,
+    output  logic                           out_done
 );
+    typedef enum logic { C_CLOCKWISE, CLOCKWISE } rotation_dir_t;
+    rotation_dir_t rotation_dir;
+
+    // signals
     logic signed [BIT_WIDTH-1:0] shifted_x, shifted_y;
+
+    // wires
     assign shifted_x = in_x >>> SHIFT_NUM;
     assign shifted_y = in_y >>> SHIFT_NUM;
 
-    typedef enum logic { C_CLOCKWISE, CLOCKWISE } rotation_dir_t;
-    rotation_dir_t rotation_dir;
     always_comb begin
-        if (in_mode) // vectoring mode
-            rotation_dir = in_y[BIT_WIDTH-1] ? CLOCKWISE : C_CLOCKWISE;
-        else // rotation mode
+        if (in_mode) begin  // vectoring mode
+            rotation_dir = in_y[BIT_WIDTH-1] ? C_CLOCKWISE : CLOCKWISE;
+        end else begin  // rotation mode
             // sign-extend in_target_angle to match bit widths
             rotation_dir = (in_current_angle < $signed({in_target_angle[BIT_WIDTH-1], in_target_angle})) ? C_CLOCKWISE : CLOCKWISE;
+        end
     end
 
     always_ff @(posedge clk) begin
@@ -95,5 +98,4 @@ module cordic_stage #(
             endcase
         end
     end  // always_ff
-
 endmodule  // cordic_stage
