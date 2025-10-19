@@ -7,9 +7,9 @@ package cordic_tb_helper;
                 almost_equal(magnitude * $sin(angle), y * K);
     endfunction
 
-    function bit check_vectorizing_values(out_x, out_angle, in_x, in_y);
-        return  almost_equal(out_x * K, $sqrt(in_x**2 + real'(in_y)**2)) &
-                almost_equal(PI * real'(out_angle) / 2.0**32, $atan2(in_y, in_x), .EPSILON(0.0005));
+    function bit check_vectorizing_values(real out_x, real out_angle, real in_x, real in_y);
+        return  almost_equal(out_x * K, $sqrt(in_x**2 + in_y**2)) &
+                almost_equal(out_angle, $atan2(in_y, in_x), .EPSILON(0.0005));
     endfunction
 
     function real abs(real value);
@@ -21,6 +21,7 @@ package cordic_tb_helper;
     endfunction
 
     function bit almost_equal(real value1, real value2, real EPSILON=10000);
+        $display("%f  -  %f  -  %f", value1, value2, EPSILON);
         return abs(value1 - value2) <= EPSILON;
     endfunction
 
@@ -83,7 +84,7 @@ package cordic_tb_helper;
             logic signed [WIDTH-1:0] out_angle,
             logic signed [WIDTH-1:0] out_x
         );
-            return check_vectorizing_values(out_x, out_angle, in_x, in_y);
+            return check_vectorizing_values(out_x, angle_to_rad(out_angle), in_x, in_y);
         endfunction
     endclass  // cordic_tester
 

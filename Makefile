@@ -11,7 +11,7 @@ VERILATOR_BUILD_DIR := $(BUILD_DIR)/verilator
 VERILATOR-NO-WARNINGS := -Wno-INITIALDLY -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND
 VERILATOR-FLAGS := --binary -j 0 $(VERILATOR-NO-WARNINGS) --trace --trace-vcd --no-stop-fail --Mdir $(VERILATOR_BUILD_DIR) # --coverage-line
 
-all: cordic.vcd cordic_sine_tb.vcd
+all: cordic_tb.vcd cordic_sine_tb.vcd
 
 # Verilator
 cordic_tb.vcd: $(HDL_FILES) $(PACKAGE_FILES) $(TB_FILES)

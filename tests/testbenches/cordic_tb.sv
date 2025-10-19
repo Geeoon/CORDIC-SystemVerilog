@@ -50,7 +50,12 @@ module cordic_tb #(
     end  // initial
 
     bit test;
+    int fails = 0;
     initial begin
+        // dump waveforms
+        $dumpfile("cordic_tb.vcd");
+        $dumpvars;
+        
         // reset
         reset = 1;
         start = 0;
@@ -78,6 +83,7 @@ module cordic_tb #(
         @(negedge done);
 
         // testing random angles
+        fails = 0;
         for (int i = 0; i < RAND_TRIALS; i++) begin
             // randomize angle
             helper.randomize_bits(in_angle);
@@ -90,6 +96,7 @@ module cordic_tb #(
             assert(test);
             if (~test) begin
                 // failed test case
+                fails++;
                 $display("%t: Failed test", $time);
                 $display("\tin_x=%d", in_x);
                 $display("\tin_y=%d", in_y);
@@ -99,6 +106,7 @@ module cordic_tb #(
             end
             @(negedge done);
         end
+        $display("Failed %d of %d tests", fails, RAND_TRIALS);
         $display("%t: -- DONE --\n", $time);
 
         // vectoring mode
@@ -106,14 +114,15 @@ module cordic_tb #(
         mode = 1;
 
         // testing random coordinates
+        fails = 0;
         for (int i = 0; i < RAND_TRIALS; i++) begin
             // randomize coordinate
             helper.randomize_bits(in_x);
-            // fix x to positive to keep in quadrant I and IV
-            if (in_x < 0) in_x = -in_x;
             helper.randomize_bits(in_y);
-            // in_y will overflow if too large, so fix size
-            in_y[WIDTH-1:WIDTH-2] = 0;
+            // if the magnitude is too large, there will be an overflow,
+            //  so leave 3 extra bits
+            in_x = in_x >> 3;  // make positive with logical shift
+            in_y = in_y >>> 3;  // keep sign
 
             // start calculation
             start = 1;
@@ -124,6 +133,7 @@ module cordic_tb #(
             assert(test);
             if (~test) begin
                 // failed test case
+                fails++;
                 $display("%t: Failed test", $time);
                 $display("\tin_x=%d", in_x);
                 $display("\tin_y=%d", in_y);
@@ -132,27 +142,10 @@ module cordic_tb #(
             end
             @(negedge done);
         end
-
+        $display("Failed %d of %d tests", fails, RAND_TRIALS);
         $display("%t: -- DONE --\n", $time);
+
         $finish;
 
     end  // initial
-
-    // unsupported by Verilator and ModelSim
-    // sequence s_rotate_ready;
-    //     (mode == 0) & $rose(ready);
-    // endsequence
-
-    // sequence s_vector_ready;
-    //     (mode == 1) & $rose(ready);
-    // endsequence
-
-    // sequence s_check_rotate
-    //     check_rotation_values(angle, in_x, out_x, out_y);
-    // endsequence
-
-    // property p_check_rotate;
-    //     $(posedge clk) s_rotate_ready |-> s_check_rotate;
-    // endproperty
-    
 endmodule  // cordic_tb
